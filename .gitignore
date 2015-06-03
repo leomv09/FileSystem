@@ -1,3 +1,9 @@
+# Netbeans
+dist/
+build/
+private/
+
+*.*~
 *.class
 
 # Mobile Tools for Java (J2ME)
