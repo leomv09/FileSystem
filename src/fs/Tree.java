@@ -55,16 +55,16 @@ public class Tree<T> {
     }
     
     /**
-     * Add a child node.
+     * Add a child tree.
      * 
-     * @param data The data to store in the new node.
-     * @param allowsChildren If the new node allows children.
+     * @param tree The tree.
+     * @return If the tree change by this call.
      * @throws Exception If this tree do not allows children.
      */
-    public void addChild(T data, boolean allowsChildren) throws Exception {
+    public boolean add(Tree<T> tree) throws Exception {
         if (this.allowsChildren) {
-            Tree<T> child = new Tree<>(this, data, allowsChildren);
-            children.add(child);
+            tree.parent = this;
+            return children.add(tree);
         }
         else {
             throw new Exception("This tree do not allow children");
@@ -75,10 +75,24 @@ public class Tree<T> {
      * Add a child node.
      * 
      * @param data The data to store in the new node.
+     * @param allowsChildren If the new node allows children.
+     * @return If the tree change by this call.
      * @throws Exception If this tree do not allows children.
      */
-    public void addChild(T data) throws Exception {
-        addChild(data, true);
+    public boolean add(T data, boolean allowsChildren) throws Exception {
+        Tree<T> child = new Tree<>(this, data, allowsChildren);
+        return add(child);
+    }
+    
+    /**
+     * Add a child node.
+     * 
+     * @param data The data to store in the new node.
+     * @return If the tree change by this call.
+     * @throws Exception If this tree do not allows children.
+     */
+    public boolean add(T data) throws Exception {
+        return add(data, true);
     }
  
     /**
@@ -87,7 +101,7 @@ public class Tree<T> {
      * @param data The data stored in the child.
      * @return true if the child is removed.
      */
-    public boolean removeChild(T data) {
+    public boolean remove(T data) {
         for (Tree<T> child : children) {
             if (child.getData().equals(data)) {
                 return children.remove(child);
@@ -122,11 +136,20 @@ public class Tree<T> {
     }
     
     /**
+     * Set the parent node.
+     * 
+     * @param parent The new parent. 
+     */
+    public void setParent(Tree<T> parent) {
+        this.parent = parent;
+    }
+    
+    /**
      * Get the amount of children nodes.
      * 
      * @return The amount of children nodes.
      */
-    public int getSize() {
+    public int size() {
         return children.size();
     }
 
@@ -135,7 +158,7 @@ public class Tree<T> {
      * 
      * @return The parent node. 
      */
-    public Tree<T> getParent() {
+    public Tree<T> parent() {
         return parent;
     }
     
@@ -144,7 +167,7 @@ public class Tree<T> {
      * 
      * @return The children nodes. 
      */
-    public List<Tree<T>> getChildren() {
+    public List<Tree<T>> children() {
         return children;
     }
 
@@ -167,4 +190,14 @@ public class Tree<T> {
         return children.isEmpty();
     }
 
+    /**
+     * Check if this node is a root node.
+     * A root node has no parent.
+     * 
+     * @return If this node is a root node.
+     */
+    public boolean isRoot() {
+        return parent == null;
+    }
+    
 }
