@@ -126,7 +126,7 @@ public class Disk {
      * @throws java.io.IOException if an I/O error occurs writing to or creating
      * the file.
      */
-    public void createFile(String path, String content) throws IOException {
+    public void createFile(String path, String content) throws IOException, Exception {
         if (!isValidPath(path)) {
             throw new MalformedURLException("Invalid file name");
         }
@@ -171,7 +171,7 @@ public class Disk {
      * @throws java.io.IOException if an I/O error occurs creating the
      * directory.
      */
-    public void createDirectory(String path) throws IOException {
+    public void createDirectory(String path) throws IOException, Exception {
         if (!isValidPath(path)) {
             throw new MalformedURLException("Invalid directory name");
         }
