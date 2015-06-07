@@ -50,7 +50,7 @@ public class CreateFileCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Create a file and set its content";
+        return "Create FILE and set its content to CONTENT";
     }
 
     @Override

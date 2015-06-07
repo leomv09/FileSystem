@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class Disk {
 
-    public static char ZERO = '0';
+    public final static char ZERO = '0';
 
     /**
      * The file where the disk is stored.

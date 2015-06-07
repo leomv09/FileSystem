@@ -114,6 +114,7 @@ public class App {
         Map<String, Command> result = new HashMap<>();
 	result.put(ListFilesCommand.COMMAND, new ListFilesCommand());
         result.put(CreateFileCommand.COMMAND, new CreateFileCommand());
+        result.put(ChangeFileCommand.COMMAND, new ChangeFileCommand());
         result.put(MakeDirectoryCommand.COMMAND, new MakeDirectoryCommand());
         result.put(HelpCommand.COMMAND, new HelpCommand());
         result.put(ExitCommand.COMMAND, new ExitCommand());
