@@ -126,7 +126,33 @@ public class Disk {
      * @throws java.io.IOException if an I/O error occurs writing to the file.
      */
     public void changeFileContent(String path, String content) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Node node = searchNode(path);
+        
+        if (node == null) {
+            throw new FileNotFoundException("File not found");
+        }
+        
+        List<Sector> sectors = node.getSectors();
+        int required = requiredSectors(content);
+        int shortage = required - sectors.size();
+        
+        if (shortage > availableSectors.size()) {
+            throw new IOException("Insufficient disk space");
+        }
+        
+        if (shortage >= 0) {
+            sectors.addAll( getSectors(shortage) );
+        }
+        else {
+            Sector sector;
+            for (int i = shortage; i < 0; i++) {
+                sector = sectors.remove(0);
+                availableSectors.add(sector);
+                writeZeros(sector);
+            }
+        }
+        
+        writeToSectors(sectors, content);
     }
 
     /**
@@ -373,15 +399,6 @@ public class Disk {
     }
 
     /**
-     * Add a list of sectors to the available sectors.
-     *
-     * @param sectors The sectors.
-     */
-    private void addSectors(List<Sector> sectors) {
-        availableSectors.addAll(sectors);
-    }
-
-    /**
      * Write a string to a file in the given sectors.
      *
      * @param sectors The sectors.
@@ -396,7 +413,7 @@ public class Disk {
                 Reader reader = new InputStreamReader(in);
                 String chunk = "";
                 
-                int c; /* The current character */
+                int c;     /* The current character */
                 int i = 0; /* The current sector */
                 int j = 0; /* The current chunk */
                 
@@ -426,18 +443,31 @@ public class Disk {
     }
 
     /**
-     * Delete the content of a set of sectors.
-     *
-     * @param sectors The sectors.
+     * Delete the content of the entire disk.
      */
-    private void writeZeros() {
+    private boolean writeZeros() {
         String text = StringUtils.repeat(Disk.ZERO, sectorSize * sectorAmount);
         try (OutputStream out = new FileOutputStream(file)) {
             Writer writer = new OutputStreamWriter(out);
             writer.write(text);
             writer.flush();
-        } 
-        catch (IOException ex) { }
+            return true;
+        }
+        catch (IOException ex) {
+            return false;
+        }
+    }
+    
+    /**
+     * Delete the content of a sector.
+     *
+     * @param sector The sector.
+     */
+    private boolean writeZeros(Sector sector) {
+        List<Sector> list = new ArrayList<>();
+        list.add(sector);
+        String text = StringUtils.repeat(Disk.ZERO, sectorSize);
+        return writeToSectors(list, text);
     }
 
 }

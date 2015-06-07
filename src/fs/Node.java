@@ -59,6 +59,10 @@ public class Node {
    {
        return this.name;
    }
+
+    public List<Sector> getSectors() {
+        return sectors;
+    }
    
    /**
     * Obtains the creation date of the node.
