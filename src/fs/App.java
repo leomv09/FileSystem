@@ -4,8 +4,12 @@ import fs.command.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -17,11 +21,19 @@ public class App {
     private final Map<String, Command> commands;
     private Disk disk;
     
+    /**
+     * Create a new App.
+     */
     private App() {
         this.commands = initializeCommands();
-        this.disk = new Disk("disk.txt", 1000, 100);
+        this.disk = new Disk("disk.txt", 100, 100);
     }
     
+    /**
+     * Gets the app instance.
+     * 
+     * @return The instance.
+     */
     public static App getInstance() {
         if (instance == null) {
             instance = new App();
@@ -29,6 +41,9 @@ public class App {
         return instance;
     }
     
+    /**
+     * Starts the simulation.
+     */
     public void start() {
         try {
 	    BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
@@ -41,7 +56,7 @@ public class App {
 		line = input.readLine();
                 
                 if (line.length() > 0) {
-                    args = line.split("\\s+");
+                    args = parseLine(line);
                     command = commands.get(args[0]);
                     
                     if (command != null) {
@@ -56,29 +71,83 @@ public class App {
 	catch (IOException ex) { }
     }
     
+    /**
+     * Get the commands.
+     * 
+     * @return The commands
+     */
     public Map<String, Command> getCommands() {
         return commands;
     }
+
+    /**
+     * Get the disk.
+     * 
+     * @return The disk.
+     */
+    public Disk getDisk() {
+        return disk;
+    }
+
+    /**
+     * Set the disk.
+     * 
+     * @param disk The new disk.
+     */
+    public void setDisk(Disk disk) {
+        this.disk = disk;
+    }
     
+    /**
+     * Report a syntax error.
+     */
     private void reportError() {
 	System.err.println("Invalid command. Try 'help' for more information.");
     }
     
+    /**
+     * Initialize the commands.
+     * 
+     * @return The commands.
+     */
     private Map<String, Command> initializeCommands() {
         Map<String, Command> result = new HashMap<>();
 	result.put(ListFilesCommand.COMMAND, new ListFilesCommand());
+        result.put(CreateFileCommand.COMMAND, new CreateFileCommand());
         result.put(MakeDirectoryCommand.COMMAND, new MakeDirectoryCommand());
         result.put(HelpCommand.COMMAND, new HelpCommand());
         result.put(ExitCommand.COMMAND, new ExitCommand());
 	return result;
     }
-
-    public Disk getDisk() {
-        return disk;
-    }
-
-    public void setDisk(Disk disk) {
-        this.disk = disk;
+    
+    /**
+     * Parse a user input line.
+     * Split the line using all spaces that are not surrounded by single or double quotes.
+     * 
+     * @param line The line.
+     * @return The parsed elements.
+     */
+    private String[] parseLine(String line) {
+        List<String> result = new ArrayList<>();
+        Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
+        Matcher matcher = regex.matcher(line);
+        
+        while (matcher.find()) {
+            if (matcher.group(1) != null) {
+                result.add(matcher.group(1));
+            }
+            else if (matcher.group(2) != null) {
+                result.add(matcher.group(2));
+            }
+            else {
+                result.add(matcher.group());
+            }
+        }
+        
+        String[] array = new String[result.size()];
+        result.toArray(array);
+        
+        return array;
     }
     
     /**

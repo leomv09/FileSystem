@@ -1,13 +1,21 @@
 package fs;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NotDirectoryException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,10 +69,13 @@ public class Disk {
         this.file = new File(path);
         this.sectorSize = sectorSize;
         this.sectorAmount = sectorAmount;
-        this.root = new Tree<>(null); // CREATE ROOT NODE HERE
+        this.root = new Tree<>(new Node(""));
         this.availableSectors = builder.create(this.sectorAmount);
         this.current = root;
-        writeZeros(this.availableSectors);
+        if (file.exists()) {
+            file.delete();
+        }
+        writeZeros();
     }
 
     /**
@@ -127,15 +138,15 @@ public class Disk {
      * the file.
      */
     public void createFile(String path, String content) throws IOException, Exception {
-        if (!isValidPath(path)) {
+        if (!FileUtils.isValidPath(path)) {
             throw new MalformedURLException("Invalid file name");
         }
         if (exists(path)) {
             throw new FileAlreadyExistsException("File already exists");
         }
 
-        String fileName = getFileName(path);
-        String directory = getDirectory(path);
+        String fileName = FileUtils.getFileName(path);
+        String directory = FileUtils.getDirectory(path);
 
         Tree<Node> parent = searchTree(directory);
         if (parent == null || !parent.getData().isDirectory()) {
@@ -143,7 +154,7 @@ public class Disk {
         }
 
         int required = requiredSectors(content);
-        if (required < availableSectors.size()) {
+        if (required > availableSectors.size()) {
             throw new IOException("Insufficient disk space");
         }
 
@@ -172,7 +183,7 @@ public class Disk {
      * directory.
      */
     public void createDirectory(String path) throws IOException, Exception {
-        if (!isValidPath(path)) {
+        if (!FileUtils.isValidPath(path)) {
             throw new MalformedURLException("Invalid directory name");
         }
         if (exists(path)) {
@@ -220,13 +231,15 @@ public class Disk {
      */
     public void moveFile(String oldPath, String newPath) throws IOException {
         Tree<Node> node = searchTree(oldPath);
+        
         if (node == null) {
             throw new FileNotFoundException("File doesn't exists");
         }
         
-        String fileName = getFileName(newPath);
-        String directory = getDirectory(newPath);
+        String fileName = FileUtils.getFileName(newPath);
+        String directory = FileUtils.getDirectory(newPath);
         Tree<Node> newDir = searchTree(directory);
+        
         if (newDir == null) {
             throw new FileNotFoundException("Directory '" + directory + "' doesn't exists");
         }
@@ -284,6 +297,9 @@ public class Disk {
         boolean changed;
         Node node;
 
+        if (path.isEmpty()) {
+            return current;
+        }
         if (path.startsWith("/")) {
             actual = root;
         }
@@ -329,41 +345,6 @@ public class Disk {
     }
 
     /**
-     * Check if a file or directory name is valid.
-     *
-     * @param name The name.
-     * @return true if the name is valid.
-     */
-    private boolean isValidName(String name) {
-        return !name.isEmpty();
-    }
-
-    /**
-     * Check if a path is valid.
-     *
-     * @param path The path.
-     * @return true if the path is valid.
-     */
-    private boolean isValidPath(String path) {
-        String[] array = path.split("/");
-        for (String curr : array) {
-            if (!isValidName(curr)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    private String getFileName(String path) {
-        String[] array = path.split("/");
-        return array[array.length - 1];
-    }
-    
-    private String getDirectory(String path) {
-        return path.substring(0, path.lastIndexOf("/"));
-    }
-
-    /**
      * Calculate the amount of sectors required to store a string in disk.
      *
      * @param content The string to store.
@@ -384,8 +365,10 @@ public class Disk {
      * @return The sectors.
      */
     private List<Sector> getSectors(int count) {
-        List<Sector> sectors = availableSectors.subList(0, count);
-        availableSectors.removeAll(sectors);
+        List<Sector> sectors = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            sectors.add(availableSectors.remove(0));
+        }
         return sectors;
     }
 
@@ -399,29 +382,6 @@ public class Disk {
     }
 
     /**
-     * Write a string to file on a given sector.
-     *
-     * @param sector The sector to write.
-     * @param content The string to write.
-     *
-     * @return true if no errors occurs.
-     */
-    private boolean writeToSector(Sector sector, String content) {
-        try {
-            RandomAccessFile raf = new RandomAccessFile(file, "rw");
-            byte[] bytes = null;
-            int index = sector.getIndex();
-            raf.readFully(bytes);
-            String text = new String(bytes);
-            text = text.substring(0, index) + content + text.substring(index + sectorSize);
-            raf.writeChars(text);
-            return true;
-        } catch (IOException ex) {
-            return false;
-        }
-    }
-
-    /**
      * Write a string to a file in the given sectors.
      *
      * @param sectors The sectors.
@@ -429,52 +389,40 @@ public class Disk {
      * @return true if no errors occurs.
      */
     private boolean writeToSectors(List<Sector> sectors, String content) {
-        try {
-            RandomAccessFile raf = new RandomAccessFile(file, "rw");
-            byte[] bytes = null;
-            Sector sector;
-            String chunk;
-            int index;
-
-            raf.readFully(bytes);
-            String text = new String(bytes);
-
-            for (int i = 0; i < sectors.size(); i++) {
-                sector = sectors.get(i);
-                index = sector.getIndex();
-                chunk = content.substring(i * sectorSize, (i + 1) * sectorSize);
-                text = text.substring(0, index) + chunk + text.substring(index + sectorSize);
+        File temp = new File("disk.temp");
+        try (InputStream in = new FileInputStream(file)) {
+            try (OutputStream out = new FileOutputStream(temp)) {
+                Writer writer = new OutputStreamWriter(out);
+                Reader reader = new InputStreamReader(in);
+                String chunk = "";
+                
+                int c; /* The current character */
+                int i = 0; /* The current sector */
+                int j = 0; /* The current chunk */
+                
+                while ((c = reader.read()) != -1) {
+                    chunk += (char) c;
+                    if (chunk.length() == sectorSize) {
+                        if (sectors.contains(new Sector(i))) {
+                            chunk = StringUtils.substring(content, j * sectorSize, (j+1) * sectorSize);
+                            chunk = StringUtils.fill(chunk, ZERO, sectorSize);
+                            j++;
+                        }
+                        writer.write(chunk);
+                        chunk = "";
+                        i++;
+                    }
+                }
+                writer.flush();
             }
-
-            raf.writeChars(text);
-            return true;
-        } catch (IOException ex) {
+        } 
+        catch (IOException ex) {
             return false;
         }
-    }
 
-    /**
-     * Create a string containing only the ZERO character.
-     *
-     * @param length The length of the string.
-     * @return The string.
-     */
-    private String createZeros(int length) {
-        String text = "";
-        for (int i = 0; i < length; i++) {
-            text += Disk.ZERO;
-        }
-        return text;
-    }
-
-    /**
-     * Delete the content of a sector.
-     *
-     * @param sector The sector.
-     */
-    private void writeZeros(Sector sector) {
-        String text = createZeros(sectorSize * sectorAmount);
-        writeToSector(sector, text);
+        file.delete();
+        temp.renameTo(file);
+        return true;
     }
 
     /**
@@ -482,9 +430,14 @@ public class Disk {
      *
      * @param sectors The sectors.
      */
-    private void writeZeros(List<Sector> sectors) {
-        String text = createZeros(sectorSize * sectorAmount);
-        writeToSectors(sectors, text);
+    private void writeZeros() {
+        String text = StringUtils.repeat(Disk.ZERO, sectorSize * sectorAmount);
+        try (OutputStream out = new FileOutputStream(file)) {
+            Writer writer = new OutputStreamWriter(out);
+            writer.write(text);
+            writer.flush();
+        } 
+        catch (IOException ex) { }
     }
 
 }

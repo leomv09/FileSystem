@@ -29,5 +29,24 @@ public class Sector {
     public int getIndex() {
         return index;
     }
-    
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + this.index;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Sector other = (Sector) obj;
+        return this.index == other.index;
+    }
+
 }
