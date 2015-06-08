@@ -115,7 +115,14 @@ public class Disk {
      * @throws java.io.IOException if an I/O error occurs reading the file.
      */
     public String getFileContent(String path) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Node node = searchNode(path);
+        
+        if(node == null)
+        {
+            throw new FileNotFoundException("File not found");
+        }
+        
+        return node.getContent(file, sectorSize);
     }
 
     /**
