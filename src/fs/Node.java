@@ -131,12 +131,12 @@ public class Node {
             }
             else
             {
-                return null;
+                return "";
             }
        }
        else
        {
-           return null;
+           return "";
        }
    }
    

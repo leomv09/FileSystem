@@ -204,7 +204,16 @@ public class Disk {
      * @throws java.io.IOException if an I/O error occurs deleting the file.
      */
     public void deleteFile(String path) throws IOException {
-        // Use function deleteTree()
+        Tree<Node> tree = searchTree(path);
+        if (tree == null) 
+        {
+            throw new FileNotFoundException("Directory doesn't exists");
+        }
+        if(tree.isLeaf())
+        {
+            deleteTree(tree);
+        }
+        
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -374,7 +383,15 @@ public class Disk {
      * @param tree The tree to delete.
      */
     private void deleteTree(Tree<Node> tree) {
-        
+        if(!tree.isRoot())
+        {
+            List<Sector> sectors = tree.getData().getSectors();
+            for(Sector sector : sectors)
+            {
+                writeZeros(sector);
+            }
+            root.remove(tree.getData());
+        }
     }
 
     /**
