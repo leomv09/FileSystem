@@ -207,7 +207,7 @@ public class Disk {
         Tree<Node> tree = searchTree(path);
         if (tree == null) 
         {
-            throw new FileNotFoundException("Directory doesn't exists");
+            throw new FileNotFoundException("File not found.");
         }
         if(tree.isLeaf())
         {
@@ -296,12 +296,27 @@ public class Disk {
      * Get the files and directories in a directory.
      *
      * @param directory The path of the directory.
-     * @return The list of children of the directory.
+     * @return The list of children of the directory. Null if the node is not a directory.
      * @throws java.io.FileNotFoundException If the file doesn't exists.
      * @throws java.io.IOException if an I/O error occurs reading the directory.
      */
     public List<Node> getFiles(String directory) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Tree treeNode = searchTree(directory);
+        List<Node>  nodesList = new ArrayList();
+        if(treeNode == null)
+        {
+            throw new FileNotFoundException("Directory not found.");
+        }
+        if(((Node)treeNode.getData()).isDirectory())
+        {
+            for(Tree tree : (List<Tree<Node>>)treeNode.children())
+            {
+                nodesList.add((Node)tree.getData());
+            }
+            
+            return nodesList;
+        }
+        return null;
     }
 
     /**
