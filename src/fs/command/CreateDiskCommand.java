@@ -14,7 +14,7 @@ import java.nio.file.Paths;
  *
  * @author Leo
  */
-public class CreateDisk extends Command{
+public class CreateDiskCommand extends Command{
     
     
     public final static String COMMAND = "CREATE"; 
