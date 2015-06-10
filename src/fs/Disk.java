@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 /**
  * Virtual Disk.
  *
@@ -216,8 +217,6 @@ public class Disk {
         {
             deleteTree(tree);
         }
-        
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -232,7 +231,7 @@ public class Disk {
             throw new MalformedURLException("Invalid directory name");
         }
         if (exists(path)) {
-            throw new FileAlreadyExistsException("Directory already exists");
+            throw new FileAlreadyExistsException("Directory already exist");
         }
 
         String[] array = path.split("/");
@@ -241,7 +240,7 @@ public class Disk {
 
         Tree<Node> parent = searchTree(directory);
         if (parent == null || !parent.getData().isDirectory()) {
-            throw new FileNotFoundException("Directory '" + directory + "' doesn't exists");
+            throw new FileNotFoundException("Directory '" + directory + "' doesn't exist");
         }
 
         Node node = new Node(name);
@@ -259,7 +258,7 @@ public class Disk {
     public void deleteDirectory(String path) throws IOException {
         Tree<Node> tree = searchTree(path);
         if (tree == null) {
-            throw new FileNotFoundException("Directory doesn't exists");
+            throw new FileNotFoundException("Directory doesn't exist");
         }
         if (tree.isRoot()) {
             throw new AccessDeniedException("Root folder cannot be deleted");
@@ -278,7 +277,7 @@ public class Disk {
         Tree<Node> node = searchTree(oldPath);
         
         if (node == null) {
-            throw new FileNotFoundException("File doesn't exists");
+            throw new FileNotFoundException("File doesn't exist");
         }
         
         String fileName = FileUtils.getFileName(newPath);
@@ -286,7 +285,7 @@ public class Disk {
         Tree<Node> newDir = searchTree(directory);
         
         if (newDir == null) {
-            throw new FileNotFoundException("Directory '" + directory + "' doesn't exists");
+            throw new FileNotFoundException("Directory '" + directory + "' doesn't exist");
         }
         
         node.setParent(newDir);
@@ -529,7 +528,7 @@ public class Disk {
                 Tree<Node> parent = searchTree(destination);
                 if(parent == null || !parent.getData().isDirectory())
                 {
-                    throw new FileNotFoundException("Directory '" + destination + "' doesn't exists");
+                    throw new FileNotFoundException("Directory '" + destination + "' doesn't exist");
                 }
                 String[] nodesList = originFile.getPath().split(File.pathSeparator);
                 for(String nodeName : nodesList)
@@ -569,7 +568,7 @@ public class Disk {
         Tree<Node> tree = searchTree(origin);
         if(tree == null)
         {
-            throw new FileNotFoundException("File '" + origin + "' doesn't exists");
+            throw new FileNotFoundException("File '" + origin + "' doesn't exist");
         }
         byte[] content = null;
         if(tree.getData().isDirectory())
@@ -599,8 +598,6 @@ public class Disk {
             content = tree.getData().getContent(file, sectorSize).getBytes();
             createRealFile(destination + tree.getData().getName(), content);
         }
-        
-        
     }
     
     /**
@@ -628,8 +625,92 @@ public class Disk {
         }
     }
     
-    private void virtualToVirtual(String origin, String destination)
+    /**
+     * Copies a file from a virtual node to another virtual node.
+     * 
+     * @param origin The real path.
+     * @param destination The virtual path.
+     */
+    private void virtualToVirtual(String origin, String destination) throws FileNotFoundException, Exception
     {
+        Tree<Node> originNode = searchTree(origin);
+        Tree<Node> destinationNode = searchTree(destination);
         
+        if(originNode == null)
+        {
+            throw new FileNotFoundException("File '" + origin + "' doesn't exist.");
+        }
+        if(destinationNode == null)
+        {
+            throw new FileNotFoundException("File '" + destination + "' doesn't exist.");
+        }
+        if(originNode.getData().isDirectory())
+        {
+            if(!destinationNode.getData().isDirectory())
+            {
+                throw new Exception("Can't copy a directory into a file.");
+            }
+            List<Tree<Node>> nodesList = originNode.children();
+            if(nodesList != null)
+            {
+                for(Tree<Node> treeNode : nodesList)
+                {
+                    if(treeNode.getData().isDirectory())
+                    {
+                        String newPath = destination + "/" + originNode.getData().getName() + "/" + treeNode.getData().getName();
+                        copyVirtualNode(newPath, originNode.getData());
+                        if(treeNode.hasChildren())
+                        {
+                            virtualToVirtual(origin + "/" + treeNode.getData().getName(), newPath);
+                        }
+                    }
+                    else
+                    {
+                        copyVirtualNode(destination + "/" + originNode.getData().getName() + "/" + treeNode.getData().getName(), treeNode.getData());
+                    }
+                }
+            }
+            else
+            {
+                Node node = searchNode(destination);
+                if(node == null)
+                {
+                    copyVirtualNode(destination + "/" + originNode.getData().getName(), originNode.getData());
+                }
+            }
+        }
+        else
+        {        
+            copyVirtualNode(destination + "/" + originNode.getData().getName(), originNode.getData());
+        }        
+    }
+    
+    /**
+     * Copies a node into another node. If the node is a file also copies its content to disk.
+     * 
+     * @param path The destination directory.
+     * @param originNode The node to copy.
+     * @return The new copied node, null otherwise.
+     * @throws Exception 
+     */
+    private Node copyVirtualNode(String path, Node originNode) throws Exception
+    {
+        Node insertedNode = null;
+        if(originNode.isDirectory())
+        {
+            createDirectory(path);
+        }
+        else
+        {
+            createFile(path, originNode.getContent(file, sectorSize));
+        }
+        insertedNode = searchNode(path);
+        if(insertedNode != null)
+        {
+            insertedNode.setCreationDate(originNode.getCreationDate());
+            insertedNode.setLastModificationDate(originNode.getLastModificationDate());
+            return insertedNode;
+        }
+        return null;
     }
 }

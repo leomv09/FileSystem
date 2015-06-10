@@ -200,4 +200,14 @@ public class Tree<T> {
         return parent == null;
     }
     
+    /**
+     * Checks if a node has children.
+     * 
+     * @return true if the nodes has children, false otherwise.
+     */
+    public boolean hasChildren()
+    {
+        return this.children.isEmpty();
+    }
+    
 }

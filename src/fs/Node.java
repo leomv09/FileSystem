@@ -165,7 +165,7 @@ public class Node {
     */
    public int getSize(File file, int sectorSize)
    {
-       return getContent(file, sectorSize).getBytes().length;
+       return getContent(file, sectorSize).toCharArray().length;
    }
    
    
