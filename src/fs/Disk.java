@@ -302,7 +302,8 @@ public class Disk {
      * @throws java.io.FileNotFoundException If the file doesn't exists.
      * @throws java.io.IOException if an I/O error occurs reading the directory.
      */
-    public List<Node> getFiles(String directory) throws IOException {
+    public List<Node> getFiles(String directory) throws IOException 
+    {
         Tree treeNode = searchTree(directory);
         List<Node>  nodesList = new ArrayList();
         if(treeNode == null)
@@ -318,7 +319,7 @@ public class Disk {
             
             return nodesList;
         }
-        return null;
+        return nodesList;
     }
 
     /**
@@ -329,8 +330,27 @@ public class Disk {
      * @return The list of children of the directory.
      * @throws java.io.IOException if an I/O error occurs reading the directory.
      */
-    public List<Node> getFiles(String directory, String regex) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public List<Node> getFiles(String directory, String regex) throws IOException 
+    {
+        Tree<Node> treeNode = searchTree(directory);
+        List<Node>  nodesList = new ArrayList();
+        if(treeNode == null)
+        {
+            throw new FileNotFoundException("Directory not found.");
+        }
+        if(treeNode.getData().isDirectory())
+        {
+            for(Tree<Node> tree : treeNode.children())
+            {
+                if(tree.getData().getName().contains(regex))
+                {
+                    nodesList.add(tree.getData());
+                }  
+            }
+            
+            return nodesList;
+        }
+        return nodesList;
     }
 
     /**
