@@ -16,7 +16,7 @@ public class Node {
     
     private String name;
     private final boolean isDirectory;
-    private final Date creationDate;
+    private Date creationDate;
     private Date lastModificationDate;
     private final List<Sector> sectors;
     
@@ -93,6 +93,22 @@ public class Node {
    {
        this.name = Name;
        this.lastModificationDate = new Date();
+   }
+   
+   /**
+    * Sets the creation date of a node.
+    * 
+    * @param date The creation date.
+    */
+   public void setCreationDate(Date date)
+   {
+       this.creationDate = date;
+   }
+   
+   
+   public void setLastModificationDate(Date date)
+   {
+       this.lastModificationDate = date;
    }
    
    /**

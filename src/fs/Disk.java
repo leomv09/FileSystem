@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -17,6 +18,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Virtual Disk.
@@ -508,5 +511,125 @@ public class Disk {
         String text = StringUtils.repeat(Disk.ZERO, sectorSize);
         return writeToSectors(list, text);
     }
-
+    
+    
+    /**
+     * Copies a file with real path to a virtual path.
+     * 
+     * @param origin The real path.
+     * @param destination The virtual path.
+     */
+    private void realToVirtual(String origin, String destination)
+    {
+        File originFile = new File(origin);
+        try 
+        {
+            if(originFile.isDirectory())
+            {
+                Tree<Node> parent = searchTree(destination);
+                if(parent == null || !parent.getData().isDirectory())
+                {
+                    throw new FileNotFoundException("Directory '" + destination + "' doesn't exists");
+                }
+                String[] nodesList = originFile.getPath().split(File.pathSeparator);
+                for(String nodeName : nodesList)
+                {
+                    Node child = new Node(nodeName);
+                    parent.add(child);
+                }
+            }
+            RandomAccessFile raf = new RandomAccessFile(originFile, "r");
+            byte[] bytes = null;
+            raf.readFully(bytes);
+            String content = new String(bytes);
+            
+            createFile(destination, content);
+        } 
+        catch (FileNotFoundException ex) 
+        {
+            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) 
+        {
+            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) 
+        {
+            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+    }
+    
+    
+    /**
+     * Copies a file with virtual path to a real path.
+     * 
+     * @param origin The real path.
+     * @param destination The virtual path.
+     */
+    private void virtualToReal(String origin, String destination) throws FileNotFoundException
+    {
+        Tree<Node> tree = searchTree(origin);
+        if(tree == null)
+        {
+            throw new FileNotFoundException("File '" + origin + "' doesn't exists");
+        }
+        byte[] content = null;
+        if(tree.getData().isDirectory())
+        {
+            List<Tree<Node>> nodesList = tree.children();
+            if(nodesList.isEmpty())
+            {
+                createRealFile(destination, null);
+                return;
+            }
+            for(Tree treeNode : nodesList)
+            {
+                Node node = (Node)treeNode.getData();
+                if(node.isDirectory())
+                {
+                    origin += "/" + node.getName() + "/";
+                }
+                else
+                {
+                    content = node.getContent(file, sectorSize).getBytes();
+                    createRealFile(destination + node.getName(), content);
+                } 
+            }
+        }
+        else
+        {
+            content = tree.getData().getContent(file, sectorSize).getBytes();
+            createRealFile(destination + tree.getData().getName(), content);
+        }
+        
+        
+    }
+    
+    /**
+     * Creates a file (can be a directory also) in the real file system.
+     * 
+     * @param destination The destination path,
+     * @param content The content of the file.
+     */
+    private void createRealFile(String destination, byte[] content)
+    {
+        try 
+        {
+            File fileOut = new File(destination);
+            if(!fileOut.exists())
+            {
+                fileOut.mkdir();
+            }
+            FileOutputStream out = new FileOutputStream(fileOut);
+            out.write(content);
+            out.close();
+        } 
+        catch (IOException ex) 
+        {
+            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void virtualToVirtual(String origin, String destination)
+    {
+        
+    }
 }
