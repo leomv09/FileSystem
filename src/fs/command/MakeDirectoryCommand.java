@@ -49,7 +49,7 @@ public class MakeDirectoryCommand extends Command {
 
     @Override
     protected String getSyntax() {
-        return getName() + " DIRECTORY...";
+        return getName() + " Directory name...";
     }
 
     @Override
