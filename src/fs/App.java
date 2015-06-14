@@ -120,6 +120,7 @@ public class App {
         result.put(FindFilesCommand.COMMAND, new FindFilesCommand());
         result.put(PrintCurrentDirectoryCommand.COMMAND, new PrintCurrentDirectoryCommand());
         result.put(PrintFileContentCommand.COMMAND, new PrintFileContentCommand());
+        result.put(PrintTreeCommand.COMMAND, new PrintTreeCommand());
         result.put(HelpCommand.COMMAND, new HelpCommand());
         result.put(ExitCommand.COMMAND, new ExitCommand());
 	return result;

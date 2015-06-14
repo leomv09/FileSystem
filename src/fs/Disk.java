@@ -378,10 +378,21 @@ public class Disk {
     /**
      * Get the file system tree.
      *
+     * @param path The path of the directory.
      * @return The file system tree.
+     * @throws java.io.IOException If the directory is not found.
      */
-    public Tree<Node> getTree() {
-        return root;
+    public Tree<Node> getTree(String path) throws IOException {
+        Tree<Node> tree = searchTree(path);
+        
+        if (tree == null) {
+            throw new FileNotFoundException("Directory not found.");
+        }
+        if (!tree.getData().isDirectory()) {
+            throw new NotDirectoryException("The path is not a directory");
+        }
+        
+        return tree;
     }
 
     /**
@@ -396,16 +407,20 @@ public class Disk {
         String[] array = path.split("/");
         Tree<Node> actual = current;
         boolean changed;
+        String curr;
         Node node;
+        int i = 0;
 
         if (path.isEmpty()) {
             return current;
         }
         if (path.startsWith("/")) {
             actual = root;
+            i = 1;
         }
-
-        for (String curr : array) {
+        
+        for (; i < array.length; i++) {
+            curr = array[i];
             changed = false;
             for (Tree<Node> child : actual.children()) {
                 node = child.getData();
