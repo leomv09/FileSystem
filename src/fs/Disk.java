@@ -100,6 +100,21 @@ public class Disk {
         }
         current = actual;
     }
+    
+    /**
+     * Get the current directory.
+     * 
+     * @return The current directory.
+     */
+    public String getCurrentDirectory() {
+        Tree<Node> tree = current;
+        String path = "";
+        while (!tree.isRoot()) {
+            path = "/" + tree.getData().getName() + path;
+            tree = tree.parent();
+        }
+        return path;
+    }
 
     /**
      * Check if a file or directory exists;
@@ -420,14 +435,11 @@ public class Disk {
      * @param tree The tree to delete.
      */
     private void deleteTree(Tree<Node> tree) {
-        if(!tree.isRoot())
-        {
+        if (!tree.isRoot()) {
+            Tree<Node> parent = tree.parent();
             List<Sector> sectors = tree.getData().getSectors();
-            for(Sector sector : sectors)
-            {
-                writeZeros(sector);
-            }
-            root.remove(tree.getData());
+            writeZeros(sectors);
+            parent.remove(tree.getData());
         }
     }
 
@@ -530,7 +542,16 @@ public class Disk {
         String text = StringUtils.repeat(Disk.ZERO, sectorSize);
         return writeToSectors(list, text);
     }
-    
+
+    /**
+     * Delete the content of a list of sectors.
+     *
+     * @param sectors The sectors.
+     */
+    private boolean writeZeros(List<Sector> sectors) {
+        String text = StringUtils.repeat(Disk.ZERO, sectorSize * sectors.size());
+        return writeToSectors(sectors, text);
+    }
     
     /**
      * Copies a file with real path to a virtual path.
@@ -733,4 +754,5 @@ public class Disk {
         }
         return null;
     }
+
 }

@@ -4,6 +4,7 @@ package fs;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class Node {
         this.isDirectory = true;
         this.creationDate = new Date();
         this.lastModificationDate = creationDate;
-        this.sectors = null;
+        this.sectors = new ArrayList<>();
     }
    
    /**
@@ -60,6 +61,11 @@ public class Node {
        return this.name;
    }
 
+   /**
+    * Obtains the sector list.
+    * 
+    * @return The sectors.
+    */
     public List<Sector> getSectors() {
         return sectors;
     }
