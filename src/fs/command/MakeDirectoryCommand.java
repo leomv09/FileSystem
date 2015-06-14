@@ -3,7 +3,10 @@ package fs.command;
 import fs.App;
 import fs.Disk;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -12,38 +15,36 @@ import java.io.InputStreamReader;
 public class MakeDirectoryCommand extends Command {
 
     public static final String COMMAND = "mkdir";
-    
+
     @Override
     public void execute(String[] args) {
         if (args.length < 2) {
             reportSyntaxError();
             return;
         }
-        
-        String path = args[1];
+
         App app = App.getInstance();
         Disk disk = app.getDisk();
-        
-        try
-        {
-            if(disk.exists(path))
-            {
-                System.out.print("There is already a directory with the same name. Do you want to override it? [y/n] ");
+        String path;
+
+        for (int i = 1; i < args.length; i++) {
+            path = args[i];
+
+            try {
+                if (disk.exists(path)) {
+                    System.out.print("There is already a directory with the same name. Do you want to override it? [y/n] ");
                     BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
                     String line = input.readLine();
-                    if (!line.equalsIgnoreCase("y")) 
-                    {
+                    if (!line.equalsIgnoreCase("y")) {
                         return;
                     }
-                    disk.deleteDirectory(path);
-                    disk.createDirectory(path);
-                    
-                    System.out.println("Directory created successfully.");
+                    disk.delete(path);
+                }
+                disk.createDirectory(path);
+            } 
+            catch (Exception ex) {
+                reportError(ex);
             }
-        }
-        catch (Exception ex) 
-        {
-            reportError(ex.getMessage());
         }
     }
 
@@ -61,5 +62,5 @@ public class MakeDirectoryCommand extends Command {
     protected String getName() {
         return COMMAND;
     }
-    
+
 }

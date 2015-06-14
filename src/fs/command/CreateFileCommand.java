@@ -34,12 +34,12 @@ public class CreateFileCommand extends Command {
                 if (!line.equalsIgnoreCase("y")) {
                     return;
                 }
-                disk.deleteFile(path);
+                disk.delete(path);
             }
             disk.createFile(path, content);
         }
         catch (Exception ex) {
-            reportError(ex.getMessage());
+            reportError(ex);
         }
     }
 

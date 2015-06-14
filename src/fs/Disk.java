@@ -125,6 +125,28 @@ public class Disk {
     public boolean exists(String path) {
         return searchTree(path) != null;
     }
+    
+    /**
+     * Check if a path is a file.
+     * 
+     * @param path The path.
+     * @return True if a file exists in the given path;
+     */
+    public boolean isFile(String path) {
+        Node node = searchNode(path);
+        return node != null && !node.isDirectory();
+    }
+    
+    /**
+     * Check if a path is a directory.
+     * 
+     * @param path The path.
+     * @return True if a directory exists in the given path;
+     */
+    public boolean isDirectory(String path) {
+        Node node = searchNode(path);
+        return node != null && node.isDirectory();
+    }
 
     /**
      * Get the content of a file.
@@ -202,7 +224,7 @@ public class Disk {
 
         Tree<Node> parent = searchTree(directory);
         if (parent == null || !parent.getData().isDirectory()) {
-            throw new FileNotFoundException("Directory '" + directory + "' doesn't exists");
+            throw new FileNotFoundException("Directory doesn't exists");
         }
 
         int required = requiredSectors(content);
@@ -215,23 +237,23 @@ public class Disk {
         writeToSectors(sectors, content);
         parent.add(node);
     }
-
+    
     /**
-     * Delete a file.
+     * Delete a file or directory.
      *
      * @param path The path of the file.
+     * @throws java.io.FileNotFoundException If the file doesn't exists.
      * @throws java.io.IOException if an I/O error occurs deleting the file.
      */
-    public void deleteFile(String path) throws IOException {
+    public void delete(String path) throws IOException {
         Tree<Node> tree = searchTree(path);
-        if (tree == null) 
-        {
-            throw new FileNotFoundException("File not found.");
+        if (tree == null) {
+            throw new FileNotFoundException("Directory doesn't exist");
         }
-        if(tree.isLeaf())
-        {
-            deleteTree(tree);
+        if (tree.isRoot()) {
+            throw new AccessDeniedException("Root folder cannot be deleted");
         }
+        deleteTree(tree);
     }
 
     /**
@@ -249,36 +271,16 @@ public class Disk {
             throw new FileAlreadyExistsException("Directory already exist");
         }
 
-        String[] array = path.split("/");
-        String name = array[array.length - 1];
-        String directory = path.substring(0, path.lastIndexOf("/"));
+        String name = FileUtils.getFileName(path);
+        String directory = FileUtils.getDirectory(path);
 
         Tree<Node> parent = searchTree(directory);
         if (parent == null || !parent.getData().isDirectory()) {
-            throw new FileNotFoundException("Directory '" + directory + "' doesn't exist");
+            throw new FileNotFoundException("Directory doesn't exist");
         }
 
         Node node = new Node(name);
         parent.add(node);
-    }
-
-    /**
-     * Delete a directory.
-     *
-     * @param path The path of the directory.
-     * @throws java.io.FileNotFoundException If the file doesn't exists.
-     * @throws java.io.IOException if an I/O error occurs deleting the
-     * directory.
-     */
-    public void deleteDirectory(String path) throws IOException {
-        Tree<Node> tree = searchTree(path);
-        if (tree == null) {
-            throw new FileNotFoundException("Directory doesn't exist");
-        }
-        if (tree.isRoot()) {
-            throw new AccessDeniedException("Root folder cannot be deleted");
-        }
-        deleteTree(tree);
     }
 
     /**

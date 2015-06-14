@@ -37,7 +37,7 @@ public class CreateDiskCommand extends Command{
         }
         catch(NumberFormatException ex)
         {
-            reportError(ex.getMessage());
+            reportError(ex);
         }
     }
 

@@ -4,9 +4,11 @@ package fs;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the nodes information of the three.
@@ -214,6 +216,50 @@ public class Node {
            return null;
        }
    }
-   
-   
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 29 * hash + Objects.hashCode(this.name);
+        hash = 29 * hash + (this.isDirectory ? 1 : 0);
+        hash = 29 * hash + Objects.hashCode(this.creationDate);
+        hash = 29 * hash + Objects.hashCode(this.lastModificationDate);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Node other = (Node) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (this.isDirectory != other.isDirectory) {
+            return false;
+        }
+        if (!Objects.equals(this.creationDate, other.creationDate)) {
+            return false;
+        }
+        return Objects.equals(this.lastModificationDate, other.lastModificationDate);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM d k:m");
+        sb.append(sdf.format(this.lastModificationDate)).append(" ");
+        sb.append(this.name);
+        if (this.isDirectory) {
+            sb.append("/");
+        }
+        return sb.toString();
+    }
+    
+    
+
 }

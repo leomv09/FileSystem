@@ -17,6 +17,10 @@ public abstract class Command {
     protected void reportError(String message) {
 	System.err.println("ERROR: " + message);
     }
+    
+    protected void reportError(Exception ex) {
+	reportError(ex.getMessage());
+    }
 
     protected void reportSyntaxError() {
 	String message = "Invalid Syntax. Try 'help " + getName() + "' for more information.";

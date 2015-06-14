@@ -7,10 +7,7 @@ package fs.command;
 
 import fs.App;
 import fs.Disk;
-import java.io.FileNotFoundException;
-import java.nio.file.NotDirectoryException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
 
 /**
  *
@@ -35,10 +32,9 @@ public class ChangeCurrentDirectoryCommand extends Command{
             String path = args[1];
             
             disk.changeCurrentDirectory(path);
-            
         } 
-        catch (FileNotFoundException | NotDirectoryException ex) {
-            Logger.getLogger(ChangeCurrentDirectoryCommand.class.getName()).log(Level.SEVERE, null, ex);
+        catch (IOException ex) {
+            reportError(ex);
         }
     }
 

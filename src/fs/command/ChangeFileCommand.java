@@ -28,7 +28,7 @@ public class ChangeFileCommand extends Command {
             disk.changeFileContent(path, content);
         } 
         catch (IOException ex) {
-            reportError(ex.getMessage());
+            reportError(ex);
         }
     }
 

@@ -1,5 +1,11 @@
 package fs.command;
 
+import fs.App;
+import fs.Disk;
+import fs.Node;
+import java.io.IOException;
+import java.util.List;
+
 /**
  *
  * @author José Andrés García Sáenz <jags9415@gmail.com>
@@ -10,9 +16,30 @@ public class ListFilesCommand extends Command {
     
     @Override
     public void execute(String[] args) {
-        if (args.length != 1) {
-            reportSyntaxError();
-            return;
+        App app = App.getInstance();
+        Disk disk = app.getDisk();
+        String directory;
+        
+        switch (args.length) {
+            case 1:
+                directory = disk.getCurrentDirectory();
+                break;
+            case 2:
+                directory = args[1];
+                break;
+            default:
+                reportSyntaxError();
+                return;
+        }
+        
+        try {
+            List<Node> files = disk.getFiles(directory);
+            for (Node file : files) {
+                System.out.println(file);
+            }
+        } 
+        catch (IOException ex) {
+            reportError(ex);
         }
     }
 
