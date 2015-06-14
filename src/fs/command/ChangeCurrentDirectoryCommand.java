@@ -13,7 +13,7 @@ import java.io.IOException;
  *
  * @author Leo
  */
-public class ChangeCurrentDirectoryCommand extends Command{
+public class ChangeCurrentDirectoryCommand extends Command {
     
     public static final String COMMAND = "cd";
 

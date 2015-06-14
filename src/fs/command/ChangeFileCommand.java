@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public class ChangeFileCommand extends Command {
 
-    public static final String COMMAND = "modfile";
+    public static final String COMMAND = "mod";
     
     @Override
     public void execute(String[] args) {

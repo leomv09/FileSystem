@@ -422,12 +422,20 @@ public class Disk {
         for (; i < array.length; i++) {
             curr = array[i];
             changed = false;
-            for (Tree<Node> child : actual.children()) {
-                node = child.getData();
-                if (node.getName().equals(curr)) {
-                    actual = child;
-                    changed = true;
-                    break;
+            if (curr.equals("..")) {
+                if (!actual.isRoot()) {
+                    actual = actual.parent();
+                }
+                changed = true;
+            }
+            else {
+                for (Tree<Node> child : actual.children()) {
+                    node = child.getData();
+                    if (node.getName().equals(curr)) {
+                        actual = child;
+                        changed = true;
+                        break;
+                    }
                 }
             }
             if (!changed) {
