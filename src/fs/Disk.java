@@ -163,12 +163,12 @@ public class Disk {
     public String getFileContent(String path) throws IOException {
         Node node = searchNode(path);
         
-        if(node == null)
+        if (node == null)
         {
             throw new FileNotFoundException("File not found");
         }
         
-        return node.getContent(file, sectorSize);
+        return readSectors(node.getSectors());
     }
 
     /**
@@ -477,6 +477,35 @@ public class Disk {
         }
         return sectors;
     }
+    
+    private String readSector(Sector sector) {
+        try (InputStream in = new FileInputStream(file)) {
+            Reader reader = new InputStreamReader(in);
+            reader.skip(sector.getIndex());
+            String content = "";
+            char c;
+            
+            for (int i = 0; i < sectorSize; i++) {
+                c = (char) reader.read();
+                if (c != Disk.ZERO) {
+                    content += c;
+                }
+            }
+            
+            return content;
+        }
+        catch (IOException ex) {
+            return "";
+        }
+    }
+    
+    private String readSectors(List<Sector> sectors) {
+        String content = "";
+        for (Sector sector : sectors) {
+            content += readSector(sector);
+        }
+        return content;
+    }
 
     /**
      * Write a string to a file in the given sectors.
@@ -636,14 +665,14 @@ public class Disk {
                 }
                 else
                 {
-                    content = node.getContent(file, sectorSize).getBytes();
+                    content = readSectors(node.getSectors()).getBytes();
                     createRealFile(destination + node.getName(), content);
                 } 
             }
         }
         else
         {
-            content = tree.getData().getContent(file, sectorSize).getBytes();
+            content = readSectors(tree.getData().getSectors()).getBytes();
             createRealFile(destination + tree.getData().getName(), content);
         }
     }
@@ -750,7 +779,7 @@ public class Disk {
         }
         else
         {
-            createFile(path, originNode.getContent(file, sectorSize));
+            createFile(path, readSectors(originNode.getSectors()));
         }
         insertedNode = searchNode(path);
         if(insertedNode != null)

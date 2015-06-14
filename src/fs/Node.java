@@ -163,59 +163,6 @@ public class Node {
            return "";
        }
    }
-   
-   /**
-    * Obtains the size of a file.
-    * 
-    * @param file The disk storage.
-    * @param sectorSize The size of each sector.
-    * @return The bytes length of the file.
-    */
-   public int getSize(File file, int sectorSize)
-   {
-       return getContent(file, sectorSize).toCharArray().length;
-   }
-   
-   
-   /**
-    * Obtains the content of the current node.
-    * 
-    * @param file The disk storage.
-    * @param sectorSize The size of each sector.
-    * @return A string containing the node content.
-    */
-   public String getContent(File file, int sectorSize)
-   {
-       try
-       {
-            RandomAccessFile raf = new RandomAccessFile(file, "rw");
-            byte[] bytes = null;
-            char[] currentChunk = null;
-            raf.readFully(bytes);
-            String text = new String(bytes);
-            StringBuilder res = new StringBuilder();
-            for(Sector sector : sectors)
-            {
-                int beginIndex = sector.getIndex() * sectorSize;
-                currentChunk = text.substring(beginIndex, beginIndex + sectorSize).toCharArray();
-                
-                for(int i = 0; i < currentChunk.length; i++)
-                {
-                    if(currentChunk[i] == Disk.ZERO)
-                    {
-                        break;
-                    }
-                    res.append(currentChunk[i]);
-                }
-            }
-            
-            return res.toString();
-       }
-       catch(IOException ex)
-       {
-           return null;
-       }
-   }
 
     @Override
     public int hashCode() {
