@@ -15,7 +15,7 @@ import java.io.IOException;
  */
 public class ChangeCurrentDirectoryCommand extends Command{
     
-    public static final String COMMAND = "CambiarDIR";
+    public static final String COMMAND = "cd";
 
     @Override
     public void execute(String[] args) {
@@ -51,7 +51,7 @@ public class ChangeCurrentDirectoryCommand extends Command{
 
     @Override
     protected String getSyntax() {
-       return getName() + " PATH...";
+       return getName() + " PATH";
     }
     
 }

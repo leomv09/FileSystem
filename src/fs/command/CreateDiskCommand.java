@@ -32,10 +32,8 @@ public class CreateDiskCommand extends Command{
             App app = App.getInstance();
             Disk disk = new Disk("disk.txt", sectorsQuantity, sectorSize);
             app.setDisk(disk);
-            Path currentRelativePath = Paths.get("");
-            System.out.println("Disk created successfully. Disk path: " + currentRelativePath.toAbsolutePath().toString() + "/disk.txt");
         }
-        catch(NumberFormatException ex)
+        catch (Exception ex)
         {
             reportError(ex);
         }
@@ -54,7 +52,7 @@ public class CreateDiskCommand extends Command{
 
     @Override
     protected String getSyntax() {
-        return getName() + " SECTORS | SECTOR_SIZE";
+        return getName() + " SECTORS SECTOR_SIZE";
     }
     
 }

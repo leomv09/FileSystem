@@ -39,7 +39,7 @@ public class ChangeFileCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Change the content of FILE to CONTENT";
+        return "Change the content of FILE to CONTENT.";
     }
 
     @Override

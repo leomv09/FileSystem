@@ -62,7 +62,7 @@ public class HelpCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Show this help";
+        return "Show this help.";
     }
 
     @Override

@@ -20,7 +20,7 @@ public class ExitCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Finish the execution";
+        return "Finish the execution.";
     }
 
     @Override

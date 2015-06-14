@@ -10,22 +10,24 @@ import java.util.List;
  *
  * @author José Andrés García Sáenz <jags9415@gmail.com>
  */
-public class ListFilesCommand extends Command {
+public class FindFilesCommand extends Command {
 
-    public static final String COMMAND = "ls";
+    public static final String COMMAND = "find";
     
     @Override
     public void execute(String[] args) {
         App app = App.getInstance();
         Disk disk = app.getDisk();
-        String directory;
+        String directory, regex;
         
         switch (args.length) {
-            case 1:
-                directory = disk.getCurrentDirectory();
-                break;
             case 2:
+                directory = disk.getCurrentDirectory();
+                regex = args[1];
+                break;
+            case 3:
                 directory = args[1];
+                regex = args[2];
                 break;
             default:
                 reportSyntaxError();
@@ -33,7 +35,7 @@ public class ListFilesCommand extends Command {
         }
         
         try {
-            List<Node> files = disk.getFiles(directory);
+            List<Node> files = disk.getFiles(directory, regex);
             for (Node file : files) {
                 System.out.println(file);
             }
@@ -44,18 +46,18 @@ public class ListFilesCommand extends Command {
     }
 
     @Override
-    protected String getSyntax() {
-        return getName() + " <DIRECTORY>";
+    protected String getName() {
+        return FindFilesCommand.COMMAND;
     }
 
     @Override
     protected String getDescription() {
-        return "List the files in DIRECTORY.";
+        return "Find all files or directories that match REGEX";
     }
 
     @Override
-    protected String getName() {
-        return COMMAND;
+    protected String getSyntax() {
+        return getName() + " <DIRECTORY> REGEX";
     }
     
 }

@@ -93,7 +93,7 @@ public class Disk {
     public void changeCurrentDirectory(String path) throws FileNotFoundException, NotDirectoryException {
         Tree<Node> actual = searchTree(path);
         if (actual == null) {
-            throw new FileNotFoundException("File not found");
+            throw new FileNotFoundException("Directory not found");
         }
         if (!actual.getData().isDirectory()) {
             throw new NotDirectoryException("The path is not a directory");
@@ -108,12 +108,17 @@ public class Disk {
      */
     public String getCurrentDirectory() {
         Tree<Node> tree = current;
-        String path = "";
-        while (!tree.isRoot()) {
-            path = "/" + tree.getData().getName() + path;
-            tree = tree.parent();
+        if (tree.isRoot()) {
+            return "/";
         }
-        return path;
+        else {
+            String path = "";
+            while (!tree.isRoot()) {
+                path = "/" + tree.getData().getName() + path;
+                tree = tree.parent();
+            }
+            return path;
+        }
     }
 
     /**
@@ -359,7 +364,7 @@ public class Disk {
         {
             for(Tree<Node> tree : treeNode.children())
             {
-                if(tree.getData().getName().contains(regex))
+                if (tree.getData().getName().matches(regex))
                 {
                     nodesList.add(tree.getData());
                 }  
