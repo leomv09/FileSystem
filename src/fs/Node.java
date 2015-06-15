@@ -1,9 +1,5 @@
-
 package fs;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +11,7 @@ import java.util.Objects;
  * 
  * @author Leonardo
  */
-public class Node {
+public abstract class Node {
     
     private String name;
     private final boolean isDirectory;
@@ -27,26 +23,26 @@ public class Node {
     /**
      * Creates a new file Node object.
      * 
-     * @param Name The name of the file.
-     * @param Sectors List of sectors related to the file.
+     * @param name The name of the file.
+     * @param sectors List of sectors related to the file.
      */
-    public Node(String Name, List<Sector> Sectors)
+    protected Node(String name, List<Sector> sectors)
     {
-        this.name = Name;
+        this.name = name;
         this.isDirectory = false;
         this.creationDate = new Date();
         this.lastModificationDate = creationDate;
-        this.sectors = Sectors;
+        this.sectors = sectors;
     }
     
     /**
      * Creates a new directory node object.
      * 
-     * @param Name The name of the directory.
+     * @param name The name of the directory.
      */
-   public Node(String Name)
+   protected Node(String name)
     {
-        this.name = Name;
+        this.name = name;
         this.isDirectory = true;
         this.creationDate = new Date();
         this.lastModificationDate = creationDate;
@@ -206,7 +202,5 @@ public class Node {
         }
         return sb.toString();
     }
-    
-    
 
 }

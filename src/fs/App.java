@@ -26,7 +26,7 @@ public class App {
      */
     private App() {
         this.commands = initializeCommands();
-        this.disk = new Disk("disk.txt", 10, 1000);
+        this.disk = new Disk("disk.txt", 1000, 10);
     }
     
     /**

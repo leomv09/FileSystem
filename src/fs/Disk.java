@@ -1,6 +1,5 @@
 package fs;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,12 +28,12 @@ import java.util.logging.Logger;
  */
 public class Disk {
 
-    public final static char ZERO = '0';
+    public final static char ZERO = 0x7F; // DEL character
 
     /**
      * The file where the disk is stored.
      */
-    private final File file;
+    private final java.io.File file;
 
     /**
      * List of available sectors.
@@ -70,10 +69,10 @@ public class Disk {
      */
     public Disk(String path, int sectorAmount, int sectorSize) {
         SectorBuilder builder = new SectorBuilder();
-        this.file = new File(path);
+        this.file = new java.io.File(path);
         this.sectorSize = sectorSize;
         this.sectorAmount = sectorAmount;
-        this.root = new Tree<>(new Node(""));
+        this.root = new Tree<>(new Directory(""));
         this.availableSectors = builder.create(this.sectorAmount);
         this.current = root;
         if (file.exists()) {
@@ -216,7 +215,7 @@ public class Disk {
      * @throws java.io.IOException if an I/O error occurs writing to or creating
      * the file.
      */
-    public void createFile(String path, String content) throws IOException, Exception {
+    public void createFile(String path, String content) throws Exception {
         if (!FileUtils.isValidPath(path)) {
             throw new MalformedURLException("Invalid file name");
         }
@@ -238,7 +237,7 @@ public class Disk {
         }
 
         List<Sector> sectors = getSectors(required);
-        Node node = new Node(fileName, sectors);
+        Node node = new File(fileName, sectors);
         writeToSectors(sectors, content);
         parent.add(node);
     }
@@ -252,6 +251,7 @@ public class Disk {
      */
     public void delete(String path) throws IOException {
         Tree<Node> tree = searchTree(path);
+        Node node = tree.getData();
         if (tree == null) {
             throw new FileNotFoundException("Directory doesn't exist");
         }
@@ -259,6 +259,9 @@ public class Disk {
             throw new AccessDeniedException("Root folder cannot be deleted");
         }
         deleteTree(tree);
+        if (current.getData().equals(node)) {
+            current = tree.parent();
+        }
     }
 
     /**
@@ -268,7 +271,7 @@ public class Disk {
      * @throws java.io.IOException if an I/O error occurs creating the
      * directory.
      */
-    public void createDirectory(String path) throws IOException, Exception {
+    public void createDirectory(String path) throws Exception {
         if (!FileUtils.isValidPath(path)) {
             throw new MalformedURLException("Invalid directory name");
         }
@@ -284,7 +287,7 @@ public class Disk {
             throw new FileNotFoundException("Directory doesn't exist");
         }
 
-        Node node = new Node(name);
+        Node node = new Directory(name);
         parent.add(node);
     }
 
@@ -482,7 +485,8 @@ public class Disk {
     private int requiredSectors(String content) {
         if (content.isEmpty()) {
             return 0;
-        } else {
+        }
+        else {
             return (int) Math.ceil((double) content.length() / (double) sectorSize);
         }
     }
@@ -501,10 +505,10 @@ public class Disk {
         return sectors;
     }
     
-    private String readSector(Sector sector) {
+    private String readSector(Sector sector) throws IOException {
         try (InputStream in = new FileInputStream(file)) {
             Reader reader = new InputStreamReader(in);
-            reader.skip(sector.getIndex());
+            reader.skip(sector.getIndex() * sectorSize);
             String content = "";
             char c;
             
@@ -517,12 +521,9 @@ public class Disk {
             
             return content;
         }
-        catch (IOException ex) {
-            return "";
-        }
     }
     
-    private String readSectors(List<Sector> sectors) {
+    private String readSectors(List<Sector> sectors) throws IOException {
         String content = "";
         for (Sector sector : sectors) {
             content += readSector(sector);
@@ -538,7 +539,7 @@ public class Disk {
      * @return true if no errors occurs.
      */
     private boolean writeToSectors(List<Sector> sectors, String content) {
-        File temp = new File("disk.temp");
+        java.io.File temp = new java.io.File("disk.temp");
         try (InputStream in = new FileInputStream(file)) {
             try (OutputStream out = new FileOutputStream(temp)) {
                 Writer writer = new OutputStreamWriter(out);
@@ -620,7 +621,7 @@ public class Disk {
      */
     private void realToVirtual(String origin, String destination)
     {
-        File originFile = new File(origin);
+        java.io.File originFile = new java.io.File(origin);
         try 
         {
             if(originFile.isDirectory())
@@ -630,10 +631,10 @@ public class Disk {
                 {
                     throw new FileNotFoundException("Directory '" + destination + "' doesn't exist");
                 }
-                String[] nodesList = originFile.getPath().split(File.pathSeparator);
+                String[] nodesList = originFile.getPath().split(java.io.File.pathSeparator);
                 for(String nodeName : nodesList)
                 {
-                    Node child = new Node(nodeName);
+                    Node child = new Directory(nodeName);
                     parent.add(child);
                 }
             }
@@ -663,7 +664,7 @@ public class Disk {
      * @param origin The real path.
      * @param destination The virtual path.
      */
-    private void virtualToReal(String origin, String destination) throws FileNotFoundException
+    private void virtualToReal(String origin, String destination) throws IOException
     {
         Tree<Node> tree = searchTree(origin);
         if(tree == null)
@@ -710,7 +711,7 @@ public class Disk {
     {
         try 
         {
-            File fileOut = new File(destination);
+            java.io.File fileOut = new java.io.File(destination);
             if(!fileOut.exists())
             {
                 fileOut.mkdir();
@@ -731,7 +732,7 @@ public class Disk {
      * @param origin The real path.
      * @param destination The virtual path.
      */
-    private void virtualToVirtual(String origin, String destination) throws FileNotFoundException, Exception
+    private void virtualToVirtual(String origin, String destination) throws Exception
     {
         Tree<Node> originNode = searchTree(origin);
         Tree<Node> destinationNode = searchTree(destination);
@@ -748,7 +749,7 @@ public class Disk {
         {
             if(!destinationNode.getData().isDirectory())
             {
-                throw new Exception("Can't copy a directory into a file.");
+                throw new IOException("Can't copy a directory into a file.");
             }
             List<Tree<Node>> nodesList = originNode.children();
             if(nodesList != null)
