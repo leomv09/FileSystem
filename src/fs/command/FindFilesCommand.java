@@ -35,11 +35,11 @@ public class FindFilesCommand extends Command {
         }
         
         try {
-            List<Node> files = disk.getFiles(directory, regex);
-            for (Node file : files) {
+            List<String> files = disk.getFiles(directory, regex);
+            for (String file : files) {
                 System.out.println(file);
             }
-        } 
+        }
         catch (IOException ex) {
             reportError(ex);
         }

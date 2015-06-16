@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Virtual Disk.
@@ -399,38 +401,26 @@ public class Disk {
     }
 
     /**
-     * Get the files that satisfies certain regex in a directory.
+     * Get the files that satisfies certain regular expression in a directory.
      *
      * @param directory The path of the directory.
      * @param regex The regular expression.
      * @return The list of children of the directory.
      * @throws java.io.IOException if an I/O error occurs reading the directory.
      */
-    public List<Node> getFiles(String directory, String regex) throws IOException 
-    {
-        if(regex.contains("*"))
-        {
-            regex = regex.replace("*", ".*");
-        }
-        Tree<Node> treeNode = searchTree(directory);
-        List<Node>  nodesList = new ArrayList();
-        if(treeNode == null)
-        {
+    public List<String> getFiles(String directory, String regex) throws IOException {
+        Tree<Node> tree = searchTree(directory);
+        
+        if (tree == null) {
             throw new FileNotFoundException("Directory not found.");
         }
-        if(treeNode.getData().isDirectory())
-        {
-            for(Tree<Node> tree : treeNode.children())
-            {
-                if (tree.getData().getName().matches(regex))
-                {
-                    nodesList.add(tree.getData());
-                }  
-            }
-            
-            return nodesList;
+        
+        try {
+            return getFiles(tree, regex.replace("*", ".*"));
         }
-        return nodesList;
+        catch (PatternSyntaxException ex) {
+            throw new IOException("Invalid regular expression " + regex);
+        }
     }
 
     /**
@@ -451,6 +441,31 @@ public class Disk {
         }
         
         return tree;
+    }
+    
+    /**
+     * Get the files that satisfies certain regular expression in the tree.
+     *
+     * @param tree The tree.
+     * @param regex The regular expression.
+     * @return The list of children that satisfies regex.
+     */
+    private List<String> getFiles(Tree<Node> tree, String regex) throws PatternSyntaxException {
+        List<String> list = new ArrayList<>();
+        Node node;
+        
+        for (Tree<Node> child : tree.children())
+        {
+            node = child.getData();
+            if (node.getName().matches(regex)) {
+                list.add(getAbsolutePath(child));
+            }
+            if (node.isDirectory()) {
+                list.addAll(getFiles(child, regex));
+            }
+        }
+
+        return list;
     }
 
     /**
