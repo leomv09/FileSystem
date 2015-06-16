@@ -1,5 +1,7 @@
 package fs.matchers;
 
+import fs.Directory;
+import fs.File;
 import fs.Node;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,8 +38,18 @@ public class ContainsNodeMatcher extends BaseMatcher<Collection<Node>> {
     }
     
     @Factory
-    public static <T> Matcher<Collection<Node>> containsNode(Node line) {
-      return new ContainsNodeMatcher(line);
+    public static <T> Matcher<Collection<Node>> containsNode(Node node) {
+      return new ContainsNodeMatcher(node);
+    }
+    
+    @Factory
+    public static <T> Matcher<Collection<Node>> containsFile(String name) {
+      return new ContainsNodeMatcher(new File(name));
+    }
+    
+    @Factory
+    public static <T> Matcher<Collection<Node>> containsDirectory(String name) {
+      return new ContainsNodeMatcher(new Directory(name));
     }
     
 }

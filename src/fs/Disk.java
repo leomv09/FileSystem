@@ -42,12 +42,12 @@ public class Disk {
     private final List<Sector> availableSectors;
 
     /**
-     * The root node of the file system tree.
+     * The root srcTree of the file system tree.
      */
     private final Tree<Node> root;
 
     /**
-     * The current directory node in the file system.
+     * The current directory srcTree in the file system.
      */
     private Tree<Node> current;
 
@@ -333,28 +333,37 @@ public class Disk {
     /**
      * Change a file location.
      *
-     * @param oldPath The path of the file.
-     * @param newPath The new path of the file.
+     * @param src The path of the file.
+     * @param dest The new path of the file.
      * @throws java.io.IOException if an I/O error occurs moving the file.
      */
-    public void moveFile(String oldPath, String newPath) throws IOException {
-        Tree<Node> node = searchTree(oldPath);
-        
-        if (node == null) {
+    public void moveFile(String src, String dest) throws Exception {
+        Tree<Node> srcTree = searchTree(src);
+
+        if (srcTree == null) {
             throw new FileNotFoundException("File doesn't exist");
         }
         
-        String fileName = FileUtils.getFileName(newPath);
-        String directory = FileUtils.getDirectory(newPath);
-        Tree<Node> newDir = searchTree(directory);
+        Tree<Node> destTree = searchTree(dest);
         
-        if (newDir == null) {
-            throw new FileNotFoundException("Directory '" + directory + "' doesn't exist");
+        if (destTree != null && destTree.getData().isDirectory()) {
+            srcTree.setParent(destTree);
         }
-        
-        node.setParent(newDir);
-        if (!fileName.isEmpty()) {
-            node.getData().setName(fileName);
+        else {
+            String fileName = FileUtils.getFileName(dest);
+            String directory = FileUtils.getDirectory(dest);
+            
+            if (!directory.isEmpty()) {
+                destTree = searchTree(directory);
+
+                if (destTree == null) {
+                    throw new FileNotFoundException("Directory '" + directory + "' doesn't exist");
+                }
+
+                srcTree.setParent(destTree);
+            }
+            
+            srcTree.getData().setName(fileName);
         }
     }
 
@@ -362,7 +371,7 @@ public class Disk {
      * Get the files and directories in a directory.
      *
      * @param directory The path of the directory.
-     * @return The list of children of the directory. Null if the node is not a directory.
+     * @return The list of children of the directory. Null if the srcTree is not a directory.
      * @throws java.io.FileNotFoundException If the file doesn't exists.
      * @throws java.io.IOException if an I/O error occurs reading the directory.
      */
@@ -489,12 +498,12 @@ public class Disk {
     }
 
     /**
-     * Search a node in the current directory or in the root. If the path starts
+     * Search a srcTree in the current directory or in the root. If the path starts
      * with '/' the search will start in the root, otherwise if will start in
      * the current directory.
      *
      * @param path The path to search.
-     * @return The node if found, otherwise null.
+     * @return The srcTree if found, otherwise null.
      */
     private Node searchNode(String path) {
         Tree<Node> actual = searchTree(path);
@@ -778,7 +787,7 @@ public class Disk {
     }
     
     /**
-     * Copies a file from a virtual node to another virtual node.
+     * Copies a file from a virtual srcTree to another virtual srcTree.
      * 
      * @param origin The first virtual path.
      * @param destination The destination virtual path.

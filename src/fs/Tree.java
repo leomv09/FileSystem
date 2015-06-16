@@ -139,9 +139,11 @@ public class Tree<T> {
      * Set the parent node.
      * 
      * @param parent The new parent. 
+     * @throws java.lang.Exception If the parent tree doesn't allow children.
      */
-    public void setParent(Tree<T> parent) {
-        this.parent = parent;
+    public void setParent(Tree<T> parent) throws Exception {
+        this.parent.remove(data);
+        parent.add(this);
     }
     
     /**
