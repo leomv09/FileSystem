@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NotDirectoryException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -206,7 +207,39 @@ public class Disk {
         
         writeToSectors(sectors, content);
     }
-
+    
+    /**
+     * Obtains the size of a file. The size is given as the total of chars that are in the file.
+     * 
+     * @param path The path of the file.
+     * @return The size of the file.
+     * @throws IOException 
+     */
+    public int getFileSize(String path) throws IOException
+    {
+        return getFileContent(path).toCharArray().length;
+    }
+    
+    /**
+     * Obtains the properties of a file.
+     * 
+     * @param path The path of the file.
+     * @return A string object containing the file properties.
+     * @throws IOException 
+     */
+    public String getFileProperties(String path) throws IOException
+    {
+        Node node = searchNode(path);
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM d k:m");
+        StringBuilder props = new StringBuilder();
+        props.append("Name: ").append(node.getName()).append("\n");
+        props.append("Extension: ").append(node.getExtension()).append("\n");
+        props.append("Creation date: ").append(sdf.format(node.getCreationDate())).append("\n");
+        props.append("Last modification date: ").append(sdf.format(node.getLastModificationDate())).append("\n");
+        props.append("Size: ").append(getFileSize(path)).append("\n");
+        return props.toString();
+    }
+    
     /**
      * Create a new file.
      *
