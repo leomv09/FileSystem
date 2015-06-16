@@ -23,7 +23,7 @@ public class MoveFileCommand extends Command{
     {
         try 
         {
-            if (args.length != 3)
+            if (args.length != 4)
             {
                 reportSyntaxError();
                 return;
