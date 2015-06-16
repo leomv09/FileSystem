@@ -21,11 +21,11 @@ public class MoveFileCommand extends Command {
                 reportSyntaxError();
                 return;
             }
-            String oldPath = args[1];
-            String newPath = args[2];
             App app = App.getInstance();
             Disk disk = app.getDisk();
-            disk.moveFile(oldPath, newPath);
+            String src = args[1];
+            String dest = args[2];
+            disk.moveFile(src, dest);
         } 
         catch (IOException ex) 
         {
@@ -48,7 +48,7 @@ public class MoveFileCommand extends Command {
     @Override
     protected String getSyntax() 
     {
-        return getName() + " OLD_PATH NEW_PATH";
+        return getName() + " SRC DEST";
     }
     
 }
