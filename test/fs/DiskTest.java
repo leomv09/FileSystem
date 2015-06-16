@@ -5,7 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static fs.matchers.ContainsNodeMatcher.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 
 /**
  *
@@ -70,8 +71,24 @@ public class DiskTest {
     }
     
     @Test
-    public void testMoveFile() throws Exception {
-        
+    public void testMoveFile() throws Exception 
+    {
+        String dir = disk.getCurrentDirectory();
+        System.out.println(dir);
+        String file = "file.txt";
+        String directory = "downloads";
+        String desktop = "desktop";
+        disk.createDirectory(directory);
+        disk.createDirectory(desktop);
+        disk.changeCurrentDirectory(dir + directory);
+        System.out.println(disk.getCurrentDirectory());
+        disk.createFile(file, "");
+        disk.moveFile(file, dir+desktop);
+        assertThat(disk.getFiles(dir), not(containsNode(new File(file))));
+        disk.changeCurrentDirectory(dir);
+        disk.changeCurrentDirectory(dir + desktop);
+         System.out.println(disk.getCurrentDirectory());
+        assertThat(disk.getFiles(dir), containsNode(new File(file)));
     }
     
     @Test
