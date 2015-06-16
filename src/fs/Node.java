@@ -17,7 +17,7 @@ public abstract class Node {
     private final boolean isDirectory;
     private Date creationDate;
     private Date lastModificationDate;
-    private final List<Sector> sectors;
+    private List<Sector> sectors;
     
     
     /**
@@ -98,7 +98,16 @@ public abstract class Node {
        this.name = Name;
        this.lastModificationDate = new Date();
    }
-   
+
+   /**
+    * Set the sectors.
+    * 
+    * @param sectors The sectors.
+    */
+    public void setSectors(List<Sector> sectors) {
+        this.sectors = sectors;
+    }
+
    /**
     * Sets the creation date of a node.
     * 

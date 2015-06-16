@@ -153,7 +153,7 @@ public class DiskTest {
         disk.changeCurrentDirectory(dir + directory);
         disk.createFile(file, "algo");
         disk.createFile(file2, "algo");
-        List<Node> files = disk.getFiles(disk.getCurrentDirectory(), "*.txt");
+        List<String> files = disk.getFiles(disk.getCurrentDirectory(), "*.txt");
         assertThat(files.size(), is(2));
     }
     
