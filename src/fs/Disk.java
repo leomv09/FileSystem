@@ -651,8 +651,9 @@ public class Disk {
      * 
      * @param origin The real path.
      * @param destination The virtual path.
+     * @throws java.io.IOException
      */
-    public void copyRealToVirtual(String origin, String destination)
+    public void copyRealToVirtual(String origin, String destination)throws IOException, Exception
     {
         java.io.File originFile = new java.io.File(origin);
         try 
@@ -696,6 +697,7 @@ public class Disk {
      * 
      * @param origin The virtual path.
      * @param destination The real path.
+     * @throws java.io.IOException
      */
     public void copyVirtualToReal(String origin, String destination) throws IOException
     {
@@ -764,8 +766,9 @@ public class Disk {
      * 
      * @param origin The first virtual path.
      * @param destination The destination virtual path.
+     * @throws java.io.IOException
      */
-    public void copyVirtualToVirtual(String origin, String destination) throws Exception
+    public void copyVirtualToVirtual(String origin, String destination) throws IOException, Exception
     {
         Tree<Node> originNode = searchTree(origin);
         Tree<Node> destinationNode = searchTree(destination);

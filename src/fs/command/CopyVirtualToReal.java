@@ -7,6 +7,7 @@ package fs.command;
 
 import fs.App;
 import fs.Disk;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,9 +15,9 @@ import java.util.logging.Logger;
  *
  * @author Leo
  */
-public class CopyRealToVirtualCommand extends Command{
+public class CopyVirtualToReal extends Command{
     
-    public static final String COMMAND = "copyRtoV";
+    public static final String COMMAND = "copyVtoR";
 
     @Override
     public void execute(String[] args) 
@@ -28,15 +29,15 @@ public class CopyRealToVirtualCommand extends Command{
                 reportSyntaxError();
                 return;
             }
-            String realPath = args[1];
-            String virtualPath = args[3];
+            String virtualPath = args[1];
+            String realPath = args[3];
             App app = App.getInstance();
             Disk disk = app.getDisk();
-            disk.copyRealToVirtual(realPath, virtualPath);
+            disk.copyVirtualToReal(virtualPath, realPath);
         } 
-        catch (Exception ex) 
+        catch (IOException ex) 
         {
-            Logger.getLogger(CopyRealToVirtualCommand.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CopyVirtualToReal.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -49,13 +50,13 @@ public class CopyRealToVirtualCommand extends Command{
     @Override
     protected String getDescription() 
     {
-        return "Copies a content from a real path to a node of the File System";
+        return "Copies a content from a virtual node to a real path";
     }
 
     @Override
     protected String getSyntax() 
     {
-        return getName() + "RealPath /to/ VirtualPath";
+        return getName() + "VitualPath /to/ RealPath";
     }
     
 }
