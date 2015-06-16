@@ -128,8 +128,6 @@ public class App {
         result.put(MoveFileCommand.COMMAND, new MoveFileCommand());
         result.put(HelpCommand.COMMAND, new HelpCommand());
         result.put(ExitCommand.COMMAND, new ExitCommand());
-        result.put(CopyRealToVirtualCommand.COMMAND, new CopyRealToVirtualCommand());
-        result.put(CopyVirtualToRealCommand.COMMAND, new CopyVirtualToRealCommand());
 	return result;
     }
     
