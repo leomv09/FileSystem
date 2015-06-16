@@ -1,23 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fs.command;
 
 import fs.App;
 import fs.Disk;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  *
  * @author Leo
  */
-public class CreateDiskCommand extends Command{
+public class CreateDiskCommand extends Command {
     
     
-    public final static String COMMAND = "CREATE"; 
+    public final static String COMMAND = "mkdisk"; 
 
     @Override
     public void execute(String[] args) {

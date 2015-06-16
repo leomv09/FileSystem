@@ -10,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -18,13 +17,10 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Virtual Disk.
@@ -111,18 +107,7 @@ public class Disk {
      * @return The current directory.
      */
     public String getCurrentDirectory() {
-        Tree<Node> tree = current;
-        if (tree.isRoot()) {
-            return "/";
-        }
-        else {
-            String path = "";
-            while (!tree.isRoot()) {
-                path = "/" + tree.getData().getName() + path;
-                tree = tree.parent();
-            }
-            return path;
-        }
+        return getAbsolutePath(current);
     }
 
     /**
@@ -174,6 +159,16 @@ public class Disk {
         
         return readSectors(node.getSectors());
     }
+    
+    public String getAbsolutePath(String path) throws IOException {
+       Tree<Node> tree = searchTree(path);
+       
+       if (tree == null) {
+           throw new FileNotFoundException("File not found");
+       }
+       
+       return getAbsolutePath(tree);
+   }
 
     /**
      * Change the content of a file.
@@ -228,20 +223,27 @@ public class Disk {
      * Obtains the properties of a file.
      * 
      * @param path The path of the file.
-     * @return A string object containing the file properties.
-     * @throws IOException 
+     * @return The file properties as a dictionary.
+     * @throws IOException If any error occur.
      */
-    public String getFileProperties(String path) throws IOException
+    public Map<String, Object> getFileProperties(String path) throws IOException
     {
         Node node = searchNode(path);
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM d k:m");
-        StringBuilder props = new StringBuilder();
-        props.append("Name: ").append(node.getName()).append("\n");
-        props.append("Extension: ").append(node.getExtension()).append("\n");
-        props.append("Creation date: ").append(sdf.format(node.getCreationDate())).append("\n");
-        props.append("Last modification date: ").append(sdf.format(node.getLastModificationDate())).append("\n");
-        props.append("Size: ").append(getFileSize(path)).append("\n");
-        return props.toString();
+        
+        if (node == null) {
+            throw new FileNotFoundException("File not found");
+        }
+        
+        Map<String, Object> properties = new TreeMap<>((Object o1, Object o2) -> 1);
+        
+        properties.put("name", node.getName());
+        properties.put("extension", node.getExtension());
+        properties.put("size", getFileSize(path));
+        properties.put("absolute_path", getAbsolutePath(path));
+        properties.put("creation_date", node.getCreationDate());
+        properties.put("modification_date", node.getLastModificationDate());
+        
+        return properties;
     }
     
     /**
@@ -512,6 +514,20 @@ public class Disk {
             parent.remove(tree.getData());
         }
     }
+    
+    private String getAbsolutePath(Tree<Node> tree) {
+       if (tree.isRoot()) {
+            return "/";
+       }
+       else {
+            String absolute = "";
+            while (!tree.isRoot()) {
+                absolute = "/" + tree.getData().getName() + absolute;
+                tree = tree.parent();
+            }
+            return absolute;
+       }
+   }
 
     /**
      * Calculate the amount of sectors required to store a string in disk.
@@ -657,45 +673,31 @@ public class Disk {
      * @param destination The virtual path.
      * @throws java.io.IOException
      */
-    public void copyRealToVirtual(String origin, String destination)throws IOException, Exception
+    public void copyRealToVirtual(String origin, String destination) throws Exception
     {
         java.io.File originFile = new java.io.File(origin);
-        try 
+        if(!exists(destination))
         {
-            if(!exists(destination))
-            {
-                throw new FileNotFoundException("Directory '" + destination + "' doesn't exist");
-            }
-            Tree<Node> node = searchTree(destination);
-            if(originFile.isFile())
-            {
-                byte[] bytes = Files.readAllBytes(originFile.toPath());
-                String content = new String(bytes);
-                writeToSectors(node.getData().getSectors(), content);
-                return;
-            }
-            if(!node.getData().isDirectory())
-            {
-                throw new FileNotFoundException("Can't copy a directory into a file.");
-            }
-            String[] nodesList = originFile.getPath().split(java.io.File.pathSeparator);
-            for(String nodeName : nodesList)
-            {
-                Node child = new Directory(nodeName);
-                node.add(child);
-            }
-            
-        } 
-        catch (FileNotFoundException ex) 
+            throw new FileNotFoundException("Directory '" + destination + "' doesn't exist");
+        }
+        Tree<Node> node = searchTree(destination);
+        if(originFile.isFile())
         {
-            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) 
+            byte[] bytes = Files.readAllBytes(originFile.toPath());
+            String content = new String(bytes);
+            writeToSectors(node.getData().getSectors(), content);
+            return;
+        }
+        if(!node.getData().isDirectory())
         {
-            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) 
+            throw new FileNotFoundException("Can't copy a directory into a file.");
+        }
+        String[] nodesList = originFile.getPath().split(java.io.File.pathSeparator);
+        for(String nodeName : nodesList)
         {
-            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
-        }        
+            Node child = new Directory(nodeName);
+            node.add(child);
+        }     
     }
     
     
@@ -762,24 +764,17 @@ public class Disk {
      * @param destination The destination path,
      * @param content The content of the file.
      */
-    private void createRealFile(String destination, String content)
+    private void createRealFile(String destination, String content) throws IOException
     {
-        try 
+        java.io.File fileOut = new java.io.File(destination);
+        if(!fileOut.exists())
         {
-            java.io.File fileOut = new java.io.File(destination);
-            if(!fileOut.exists())
-            {
-                throw new FileNotFoundException("File '" + destination + "' doesn't exist");
-            }
-            FileWriter fw = new FileWriter(fileOut.getAbsoluteFile());
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(content);
-            bw.close();
-        } 
-        catch (IOException ex) 
-        {
-            Logger.getLogger(Disk.class.getName()).log(Level.SEVERE, null, ex);
+            throw new FileNotFoundException("File '" + destination + "' doesn't exist");
         }
+        FileWriter fw = new FileWriter(fileOut.getAbsoluteFile());
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(content);
+        bw.close();
     }
     
     /**
