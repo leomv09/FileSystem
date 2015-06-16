@@ -3,10 +3,7 @@ package fs.command;
 import fs.App;
 import fs.Disk;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -50,7 +47,7 @@ public class MakeDirectoryCommand extends Command {
 
     @Override
     protected String getSyntax() {
-        return getName() + " Directory name...";
+        return getName() + " DIRECTORY...";
     }
 
     @Override

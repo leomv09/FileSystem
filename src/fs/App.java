@@ -121,6 +121,11 @@ public class App {
         result.put(PrintCurrentDirectoryCommand.COMMAND, new PrintCurrentDirectoryCommand());
         result.put(PrintFileContentCommand.COMMAND, new PrintFileContentCommand());
         result.put(PrintTreeCommand.COMMAND, new PrintTreeCommand());
+        result.put(ListPropertiesCommand.COMMAND, new ListPropertiesCommand());
+        result.put(CopyCommand.COMMAND, new CopyCommand());
+        result.put(CreateDiskCommand.COMMAND, new CreateDiskCommand());
+        result.put(DeleteFileCommand.COMMAND, new DeleteFileCommand());
+        result.put(MoveFileCommand.COMMAND, new MoveFileCommand());
         result.put(HelpCommand.COMMAND, new HelpCommand());
         result.put(ExitCommand.COMMAND, new ExitCommand());
         result.put(CopyRealToVirtualCommand.COMMAND, new CopyRealToVirtualCommand());

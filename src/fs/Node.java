@@ -109,7 +109,6 @@ public abstract class Node {
        this.creationDate = date;
    }
    
-   
    public void setLastModificationDate(Date date)
    {
        this.lastModificationDate = date;
@@ -123,6 +122,7 @@ public abstract class Node {
    public void addSector(Sector sector)
    {
        this.sectors.add(sector);
+       this.lastModificationDate = new Date();
    }
 
    /**
@@ -142,21 +142,21 @@ public abstract class Node {
     */
    public String getExtension()
    {
-       if(!this.isDirectory())
+       if (!this.isDirectory())
        {
-            int index = this.name.indexOf(".");
-            if(index != -1)
+            int index = this.name.lastIndexOf(".");
+            if (index != -1)
             {
-                return this.name.substring(index, name.length());
+                return this.name.substring(index);
             }
             else
             {
-                return "";
+                return "none";
             }
        }
        else
        {
-           return "";
+           return "none";
        }
    }
 
