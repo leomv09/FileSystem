@@ -2,7 +2,7 @@ package fs.command;
 
 import fs.App;
 import fs.Disk;
-import fs.StringUtils;
+import fs.util.StringUtils;
 import java.io.IOException;
 
 /**

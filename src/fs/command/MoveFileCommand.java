@@ -27,7 +27,7 @@ public class MoveFileCommand extends Command {
             String dest = args[2];
             disk.moveFile(src, dest);
         } 
-        catch (IOException ex) 
+        catch (Exception ex) 
         {
             reportError(ex);
         }
