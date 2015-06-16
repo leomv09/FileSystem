@@ -408,6 +408,10 @@ public class Disk {
      */
     public List<Node> getFiles(String directory, String regex) throws IOException 
     {
+        if(regex.contains("*"))
+        {
+            regex = regex.replace("*", ".*");
+        }
         Tree<Node> treeNode = searchTree(directory);
         List<Node>  nodesList = new ArrayList();
         if(treeNode == null)

@@ -6,6 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static fs.matchers.ContainsNodeMatcher.*;
 import java.nio.file.Files;
+import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import org.junit.Ignore;
@@ -141,8 +142,19 @@ public class DiskTest {
     }
     
     @Test
-    public void testFind() throws Exception {
-        
+    public void testFind() throws Exception 
+    {
+        String dir = disk.getCurrentDirectory();
+        System.out.println(dir);
+        String file = "file.txt";
+        String file2 = "file2.txt";
+        String directory = "downloads";
+        disk.createDirectory(directory);
+        disk.changeCurrentDirectory(dir + directory);
+        disk.createFile(file, "algo");
+        disk.createFile(file2, "algo");
+        List<Node> files = disk.getFiles(disk.getCurrentDirectory(), "*.txt");
+        assertThat(files.size(), is(2));
     }
     
 }

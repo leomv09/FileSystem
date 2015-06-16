@@ -130,7 +130,6 @@ public class App {
         result.put(ExitCommand.COMMAND, new ExitCommand());
         result.put(CopyRealToVirtualCommand.COMMAND, new CopyRealToVirtualCommand());
         result.put(CopyVirtualToRealCommand.COMMAND, new CopyVirtualToRealCommand());
-        result.put(CopyVirtualToVirtualCommand.COMMAND, new CopyVirtualToVirtualCommand());
 	return result;
     }
     
