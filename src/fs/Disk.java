@@ -708,12 +708,16 @@ public class Disk {
         {
             throw new FileNotFoundException("Can't copy a directory into a file.");
         }
-        String[] nodesList = originFile.getPath().split(java.io.File.pathSeparator);
+        String path = originFile.getPath().replace("\\", "/");
+        String[] nodesList = path.split("/");
+
+        String olddir = getCurrentDirectory();
         for(String nodeName : nodesList)
         {
-            Node child = new Directory(nodeName);
-            node.add(child);
-        }     
+            createDirectory(nodeName);
+            changeCurrentDirectory(getCurrentDirectory()+"/"+nodeName);
+        }
+        changeCurrentDirectory(olddir);
     }
     
     

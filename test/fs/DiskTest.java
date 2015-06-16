@@ -109,7 +109,7 @@ public class DiskTest {
     
     @Test
     @Ignore
-    public void testRealToVirtualCopy() throws Exception 
+    public void testRealToVirtualCopyFile() throws Exception 
     {
         String dir = disk.getCurrentDirectory();
         System.out.println(dir);
@@ -120,6 +120,21 @@ public class DiskTest {
         disk.createFile(file, "algo");
         disk.copyRealToVirtual("C:\\Users\\Leo\\Desktop\\realFile.txt", disk.getCurrentDirectory() + "/" + file);
         assertThat(disk.getFileContent(file), is("cosas."));
+    }
+    
+     @Test
+    public void testRealToVirtualCopyDirectory() throws Exception 
+    {
+        String dir = disk.getCurrentDirectory();
+        System.out.println(dir);
+        String file = "file.txt";
+        String directory = "downloads";
+        disk.createDirectory(directory);
+        disk.changeCurrentDirectory(dir + directory);
+        disk.createFile(file, "algo");
+        disk.copyRealToVirtual("C:\\Users\\Leo\\Desktop", disk.getCurrentDirectory());
+        assertTrue(disk.exists("/downloads/C:/Users/Leo/Desktop"));
+        //assertThat(disk.getFileContent(file), is("cosas."));
     }
     
     @Test
