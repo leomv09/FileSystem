@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  *
  * @author Leo
  */
-public class CopyVirtualToReal extends Command{
+public class CopyVirtualToRealCommand extends Command{
     
     public static final String COMMAND = "copyVtoR";
 
@@ -37,7 +37,7 @@ public class CopyVirtualToReal extends Command{
         } 
         catch (IOException ex) 
         {
-            Logger.getLogger(CopyVirtualToReal.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CopyVirtualToRealCommand.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

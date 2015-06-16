@@ -123,6 +123,9 @@ public class App {
         result.put(PrintTreeCommand.COMMAND, new PrintTreeCommand());
         result.put(HelpCommand.COMMAND, new HelpCommand());
         result.put(ExitCommand.COMMAND, new ExitCommand());
+        result.put(CopyRealToVirtualCommand.COMMAND, new CopyRealToVirtualCommand());
+        result.put(CopyVirtualToRealCommand.COMMAND, new CopyVirtualToRealCommand());
+        result.put(CopyVirtualToVirtualCommand.COMMAND, new CopyVirtualToVirtualCommand());
 	return result;
     }
     

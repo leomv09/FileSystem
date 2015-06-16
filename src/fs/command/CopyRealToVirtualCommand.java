@@ -55,7 +55,7 @@ public class CopyRealToVirtualCommand extends Command{
     @Override
     protected String getSyntax() 
     {
-        return getName() + "RealPath /to/ VirtualPath";
+        return getName() + " RealPath /to/ VirtualPath";
     }
     
 }
