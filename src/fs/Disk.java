@@ -21,9 +21,12 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Virtual Disk.
@@ -40,7 +43,7 @@ public class Disk {
     private final java.io.File file;
 
     /**
-     * List of available sectors.
+     * List of available oldSectors.
      */
     private final List<Sector> availableSectors;
 
@@ -60,7 +63,7 @@ public class Disk {
     private final int sectorSize;
 
     /**
-     * The amount of sectors in the disk.
+     * The amount of oldSectors in the disk.
      */
     private final int sectorAmount;
 
@@ -68,7 +71,7 @@ public class Disk {
      * Create a new disk.
      *
      * @param path The path where the disk will be write.
-     * @param sectorAmount The amount of sectors of the disk.
+     * @param sectorAmount The amount of oldSectors of the disk.
      * @param sectorSize The size of a single sector.
      */
     public Disk(String path, int sectorAmount, int sectorSize) {
@@ -187,27 +190,17 @@ public class Disk {
             throw new FileNotFoundException("File not found");
         }
         
-        List<Sector> sectors = node.getSectors();
-        int required = requiredSectors(content);
-        int shortage = required - sectors.size();
+        List<Sector> oldSectors = node.getSectors();
+        markSectorsAsAvailable(oldSectors);
         
-        if (shortage > availableSectors.size()) {
+        int required = requiredSectors(content);
+        if (required > availableSectors.size()) {
             throw new IOException("Insufficient disk space");
         }
-        
-        if (shortage >= 0) {
-            sectors.addAll( getSectors(shortage) );
-        }
-        else {
-            Sector sector;
-            for (int i = shortage; i < 0; i++) {
-                sector = sectors.remove(0);
-                availableSectors.add(sector);
-                writeZeros(sector);
-            }
-        }
-        
-        writeToSectors(sectors, content);
+
+        List<Sector> newSectors = getSectors(required);
+        writeToSectors(newSectors, content);
+        node.setSectors(newSectors);
     }
     
     /**
@@ -399,38 +392,26 @@ public class Disk {
     }
 
     /**
-     * Get the files that satisfies certain regex in a directory.
+     * Get the files that satisfies certain regular expression in a directory.
      *
      * @param directory The path of the directory.
      * @param regex The regular expression.
      * @return The list of children of the directory.
      * @throws java.io.IOException if an I/O error occurs reading the directory.
      */
-    public List<Node> getFiles(String directory, String regex) throws IOException 
-    {
-        if(regex.contains("*"))
-        {
-            regex = regex.replace("*", ".*");
-        }
-        Tree<Node> treeNode = searchTree(directory);
-        List<Node>  nodesList = new ArrayList();
-        if(treeNode == null)
-        {
+    public List<String> getFiles(String directory, String regex) throws IOException {
+        Tree<Node> tree = searchTree(directory);
+        
+        if (tree == null) {
             throw new FileNotFoundException("Directory not found.");
         }
-        if(treeNode.getData().isDirectory())
-        {
-            for(Tree<Node> tree : treeNode.children())
-            {
-                if (tree.getData().getName().matches(regex))
-                {
-                    nodesList.add(tree.getData());
-                }  
-            }
-            
-            return nodesList;
+        
+        try {
+            return getFiles(tree, regex.replace("*", ".*"));
         }
-        return nodesList;
+        catch (PatternSyntaxException ex) {
+            throw new IOException("Invalid regular expression " + regex);
+        }
     }
 
     /**
@@ -451,6 +432,31 @@ public class Disk {
         }
         
         return tree;
+    }
+    
+    /**
+     * Get the files that satisfies certain regular expression in the tree.
+     *
+     * @param tree The tree.
+     * @param regex The regular expression.
+     * @return The list of children that satisfies regex.
+     */
+    private List<String> getFiles(Tree<Node> tree, String regex) throws PatternSyntaxException {
+        List<String> list = new ArrayList<>();
+        Node node;
+        
+        for (Tree<Node> child : tree.children())
+        {
+            node = child.getData();
+            if (node.getName().matches(regex)) {
+                list.add(getAbsolutePath(child));
+            }
+            if (node.isDirectory()) {
+                list.addAll(getFiles(child, regex));
+            }
+        }
+
+        return list;
     }
 
     /**
@@ -526,7 +532,7 @@ public class Disk {
         if (!tree.isRoot()) {
             Tree<Node> parent = tree.parent();
             List<Sector> sectors = tree.getData().getSectors();
-            writeZeros(sectors);
+            markSectorsAsAvailable(sectors);
             parent.remove(tree.getData());
         }
     }
@@ -546,10 +552,10 @@ public class Disk {
    }
 
     /**
-     * Calculate the amount of sectors required to store a string in disk.
+     * Calculate the amount of oldSectors required to store a string in disk.
      *
      * @param content The string to store.
-     * @return The required sectors.
+     * @return The required oldSectors.
      */
     private int requiredSectors(String content) {
         if (content.isEmpty()) {
@@ -561,10 +567,10 @@ public class Disk {
     }
 
     /**
-     * Remove and return n sectors from the list of available sectors.
+     * Remove and return n oldSectors from the list of available oldSectors.
      *
-     * @param count The number of sectors to remove.
-     * @return The sectors.
+     * @param count The number of oldSectors to remove.
+     * @return The oldSectors.
      */
     private List<Sector> getSectors(int count) {
         List<Sector> sectors = new ArrayList<>();
@@ -572,6 +578,17 @@ public class Disk {
             sectors.add(availableSectors.remove(0));
         }
         return sectors;
+    }
+    
+    /**
+     * Wipe and add a sector list to the available oldSectors.
+     * 
+     * @param sectors The oldSectors.
+     */
+    private void markSectorsAsAvailable(List<Sector> sectors) {
+        writeZeros(sectors);
+        availableSectors.addAll(sectors);
+        Collections.sort(availableSectors);
     }
     
     private String readSector(Sector sector) throws IOException {
@@ -601,9 +618,9 @@ public class Disk {
     }
 
     /**
-     * Write a string to a file in the given sectors.
+     * Write a string to a file in the given oldSectors.
      *
-     * @param sectors The sectors.
+     * @param sectors The oldSectors.
      * @param content The content to write.
      * @return true if no errors occurs.
      */
@@ -673,9 +690,9 @@ public class Disk {
     }
 
     /**
-     * Delete the content of a list of sectors.
+     * Delete the content of a list of oldSectors.
      *
-     * @param sectors The sectors.
+     * @param sectors The oldSectors.
      */
     private boolean writeZeros(List<Sector> sectors) {
         String text = StringUtils.repeat(Disk.ZERO, sectorSize * sectors.size());

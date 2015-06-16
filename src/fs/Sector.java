@@ -5,7 +5,7 @@ package fs;
  * 
  * @author José Andrés García Sáenz <jags9415@gmail.com>
  */
-public class Sector {
+public class Sector implements Comparable<Sector> {
     
     /**
      * The sector index.
@@ -47,6 +47,11 @@ public class Sector {
         }
         final Sector other = (Sector) obj;
         return this.index == other.index;
+    }
+
+    @Override
+    public int compareTo(Sector other) {
+        return this.index - other.index;
     }
 
 }
