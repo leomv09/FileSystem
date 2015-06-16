@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class MoveFileCommand extends Command{
 
-    public static final String COMMAND = "Move";
+    public static final String COMMAND = "move";
     @Override
     public void execute(String[] args) 
     {
