@@ -853,32 +853,31 @@ public class Disk {
      */
     public void copyVirtualToVirtual(String origin, String destination) throws IOException, Exception
     {
-        Tree<Node> originNode = searchTree(origin);
-        Tree<Node> destinationNode = searchTree(destination);
+        Node originNode = searchNode(origin);
+        Node destinationNode = searchNode(destination);
         Node copiedNode = null;
         if(originNode == null)
         {
             throw new FileNotFoundException("File '" + origin + "' doesn't exist.");
         }
-        if(originNode.getData().isDirectory())
+        if(originNode.isDirectory())
         {
+            Tree<Node> tree = searchTree(origin);
             if(destinationNode == null)
             {
                 createDirectory(destination);
-                destinationNode = searchTree(destination);
+                destinationNode = searchNode(destination);
+                System.out.println("Dir: "+destinationNode.getName()+" created");
             }
-            if(!destinationNode.getData().isDirectory())
+            if(!destinationNode.isDirectory())
             {
                 throw new FileNotFoundException("Cant't copy a directory to a file.");
             }
             changeCurrentDirectory(destination);
             destination = getCurrentDirectory();
-            if(originNode.hasChildren())
+            for(Tree<Node> child : tree.children())
             {
-                for(Tree<Node> child : originNode.children())
-                {
-                    copyVirtualToVirtual(origin+"/"+child.getData().getName(), destination);
-                }
+                copyVirtualToVirtual("/"+origin+"/"+child.getData().getName(), destination);
             }
         }
         else
@@ -886,7 +885,17 @@ public class Disk {
             if(exists(destination))
             {
                 Node node = searchNode(destination);
-                writeToSectors(node.getSectors(), getFileContent(origin));
+                if(node.isDirectory())
+                {
+                    String dir = getCurrentDirectory();
+                    changeCurrentDirectory(destination);
+                    createFile(originNode.getName(), getFileContent(origin));
+                    changeCurrentDirectory(dir);
+                }
+                else
+                {
+                    writeToSectors(node.getSectors(), getFileContent(origin));
+                }    
             }
             else
             {
@@ -896,8 +905,8 @@ public class Disk {
         copiedNode = searchNode(destination);
         if(copiedNode != null)
         {
-            copiedNode.setCreationDate(originNode.getData().getCreationDate());
-            copiedNode.setLastModificationDate(originNode.getData().getLastModificationDate());
+            copiedNode.setCreationDate(originNode.getCreationDate());
+            copiedNode.setLastModificationDate(originNode.getLastModificationDate());
         }      
     }
 }
