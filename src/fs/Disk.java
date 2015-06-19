@@ -20,11 +20,14 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -719,32 +722,49 @@ public class Disk {
     public void copyRealToVirtual(String origin, String destination) throws Exception
     {
         java.io.File originFile = new java.io.File(origin);
-        if(!exists(destination))
+        Tree<Node> destinationNode = searchTree(destination);
+        Node copiedNode = null;
+        if(originFile.isDirectory())
         {
-            throw new FileNotFoundException("Directory '" + destination + "' doesn't exist");
+            if(destinationNode == null)
+            {
+                createDirectory(destination);
+                destinationNode = searchTree(destination);
+            }
+            if(!destinationNode.getData().isDirectory())
+            {
+                throw new FileNotFoundException("Cant't copy a directory to a file.");
+            }
+            changeCurrentDirectory(destination);
+            destination = getCurrentDirectory();
+            for(String child : originFile.list())
+            {
+                copyRealToVirtual(origin+"/"+child, destination);
+            }
         }
-        Tree<Node> node = searchTree(destination);
-        if(originFile.isFile())
+        else
         {
-            byte[] bytes = Files.readAllBytes(originFile.toPath());
-            String content = new String(bytes);
-            writeToSectors(node.getData().getSectors(), content);
-            return;
+            if(exists(destination))
+            {
+                Node node = destinationNode.getData();
+                byte[] bytes = Files.readAllBytes(originFile.toPath());
+                String content = new String(bytes);
+                writeToSectors(node.getSectors(), content);
+            }
+            else
+            {
+                byte[] bytes = Files.readAllBytes(originFile.toPath());
+                String content = new String(bytes);
+                createFile(destination, content);
+            }
         }
-        if(!node.getData().isDirectory())
+        copiedNode = searchNode(destination);
+        if(copiedNode != null)
         {
-            throw new FileNotFoundException("Can't copy a directory into a file.");
-        }
-        String path = originFile.getPath().replace("\\", "/");
-        String[] nodesList = path.split("/");
-
-        String olddir = getCurrentDirectory();
-        for(String nodeName : nodesList)
-        {
-            createDirectory(nodeName);
-            changeCurrentDirectory(getCurrentDirectory()+"/"+nodeName);
-        }
-        changeCurrentDirectory(olddir);
+           BasicFileAttributes attr = Files.readAttributes(originFile.toPath(), BasicFileAttributes.class);
+            copiedNode.setCreationDate(new Date(attr.creationTime().to(TimeUnit.DAYS)));
+            copiedNode.setLastModificationDate(new Date(originFile.lastModified()));
+        } 
     }
     
     
