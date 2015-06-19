@@ -722,35 +722,50 @@ public class Disk {
     public void copyRealToVirtual(String origin, String destination) throws Exception
     {
         java.io.File originFile = new java.io.File(origin);
-        Tree<Node> destinationNode = searchTree(destination);
+        Node destinationNode = searchNode(destination);
         boolean exists = true;
         Node copiedNode = null;
         if(originFile.isDirectory())
         {
             if(destinationNode == null)
             {
+                exists = false;
                 createDirectory(destination);
-                destinationNode = searchTree(destination);
+                destinationNode = searchNode(destination);
             }
-            if(!destinationNode.getData().isDirectory())
+            if(!destinationNode.isDirectory())
             {
                 throw new FileNotFoundException("Cant't copy a directory to a file.");
             }
+            String oldDir = getCurrentDirectory();
             changeCurrentDirectory(destination);
             destination = getCurrentDirectory();
+            if(exists)
+            {
+                createDirectory(origin);
+                destination += "/"+origin;            
+            }
             for(String child : originFile.list())
             {
                 copyRealToVirtual(origin+"/"+child, destination);
             }
+            changeCurrentDirectory(oldDir);
         }
         else
         {
             if(exists(destination))
             {
-                Node node = destinationNode.getData();
                 byte[] bytes = Files.readAllBytes(originFile.toPath());
                 String content = new String(bytes);
-                writeToSectors(node.getSectors(), content);
+                if(destinationNode.isDirectory())
+                {
+                    String dir = getCurrentDirectory();
+                    changeCurrentDirectory(destination);
+                    createFile(originFile.getName(), content);
+                    changeCurrentDirectory(dir);
+                }
+                
+                writeToSectors(destinationNode.getSectors(), content);
             }
             else
             {
@@ -788,19 +803,17 @@ public class Disk {
         if(originNode.isDirectory())
         {
             Tree<Node> tree = searchTree(origin);
-            System.out.println("Origin node is a directory");
             if(destinationNode == null)
             {
                 exists = false;
                 createDirectory(destination);
                 destinationNode = searchNode(destination);
-                System.out.println("Dir: "+destinationNode.getName()+" created");
             }
             if(!destinationNode.isDirectory())
             {
                 throw new FileNotFoundException("Cant't copy a directory to a file.");
             }
-            System.out.println("Destination node is a directory");
+            String oldDir = getCurrentDirectory();
             changeCurrentDirectory(destination);
             destination = getCurrentDirectory();
             if(exists)
@@ -810,13 +823,12 @@ public class Disk {
             }
             for(Tree<Node> child : tree.children())
             {
-                System.out.println("Creating child from: "+origin+"/"+child.getData().getName()+" to: "+destination);
                 copyVirtualToVirtual("/"+origin+"/"+child.getData().getName(), destination);
             }
+            changeCurrentDirectory(oldDir);
         }
         else
         {
-            System.out.println("origin is a file");
             if(exists(destination))
             {
                 Node node = searchNode(destination);
@@ -857,49 +869,31 @@ public class Disk {
     public void copyVirtualToReal(String origin, String destination) throws IOException
     {
         java.io.File fileOut = new java.io.File(destination);
-        Tree<Node> tree = searchTree(origin);
-        if(tree == null)
+        Node originNode = searchNode(origin);
+        if(originNode == null)
         {
             throw new FileNotFoundException("File '" + origin + "' doesn't exist");
         }
-        String content = null;
-        if(tree.getData().isDirectory())
+        if(originNode.isDirectory())
         {
             if(!fileOut.isDirectory())
             {
                 throw new FileNotFoundException("Can't copy a directory into a file.");
             }
-            List<Tree<Node>> nodesList = tree.children();
-            if(nodesList.isEmpty())
+            if(!(new java.io.File(destination+"/"+origin)).exists())
             {
-                java.io.File newDir = new java.io.File(destination+tree.getData().getName());
-                if(!newDir.exists())
-                {
-                    newDir.mkdir();
-                    return;
-                }
-                else
-                {
-                    throw new FileNotFoundException("Failed to create directory.");
-                }
+                new java.io.File(destination+"/"+origin).mkdir();
+                destination += "/"+origin;            
             }
-            for(Tree treeNode : nodesList)
+            Tree<Node> tree = searchTree(origin);
+            for(Tree<Node> child  : tree.children())
             {
-                Node node = (Node)treeNode.getData();
-                if(node.isDirectory())
-                {
-                    origin += "/" + node.getName() + "/";
-                }
-                else
-                {
-                    content = readSectors(node.getSectors());
-                    createRealFile(destination, content);
-                } 
+                copyVirtualToReal(origin+"/"+child.getData().getName(), destination);
             }
         }
         else
         {
-            content = readSectors(tree.getData().getSectors());
+            String content = readSectors(originNode.getSectors());
             createRealFile(destination, content);
         }
     }
@@ -913,10 +907,6 @@ public class Disk {
     private void createRealFile(String destination, String content) throws IOException
     {
         java.io.File fileOut = new java.io.File(destination);
-        if(!fileOut.exists())
-        {
-            throw new FileNotFoundException("File '" + destination + "' doesn't exist");
-        }
         FileWriter fw = new FileWriter(fileOut.getAbsoluteFile());
         BufferedWriter bw = new BufferedWriter(fw);
         bw.write(content);

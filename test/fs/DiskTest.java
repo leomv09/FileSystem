@@ -18,12 +18,14 @@ public class DiskTest {
     
     private static final String diskName = "test-disk.txt";
     private static final java.io.File realFile = new java.io.File("file1.txt");
-    private static final java.io.File realDirectory = new java.io.File("real");
+    private static java.io.File realDirectory;
     private Disk disk;
     
     @Before
     public void setUp() {
         this.disk = new Disk(DiskTest.diskName, 1000, 10);
+        realDirectory  = new java.io.File("real");
+        realDirectory.mkdir();
     }
     
     @AfterClass
@@ -180,7 +182,7 @@ public class DiskTest {
         assertThat(disk.getFiles(dir), not(containsDirectory(desktop)));
         assertThat(disk.getFiles(downloads), containsDirectory(downloads));
     }
-    
+    */
     @Test
     public void testVirtualToVirtualCopyFile_FileToFile() throws Exception {
         String dir = disk.getCurrentDirectory();
@@ -252,7 +254,7 @@ public class DiskTest {
         assertThat(disk.getFiles(dir+downloads), containsFile(file1));
         assertThat(disk.getFiles(dir+desktop), containsFile(file1));
     }
- */
+ 
     @Test
     public void testVirtualToVirtualCopyDirectory_DirectoryToOtherDirectory_KeepName() throws Exception {
         String dir = disk.getCurrentDirectory();
@@ -274,7 +276,6 @@ public class DiskTest {
         assertThat(disk.getFiles(dir+desktop + "/" + downloads), containsFile(file1));
     }
     
-/*
     @Test
     public void testVirtualToVirtualCopyDirectory_DirectoryToOtherDirectory_ChangeName() throws Exception {
         String dir = disk.getCurrentDirectory();
@@ -295,6 +296,9 @@ public class DiskTest {
         assertThat(disk.getFiles(dir+desktop), containsDirectory(desktop));
         assertThat(disk.getFiles(dir+desktop + "/" + desktop), containsFile(file1));
     }
+    
+    
+    
     
     @Test
     public void testRealToVirtualCopyFile() throws Exception 
@@ -322,6 +326,8 @@ public class DiskTest {
         assertThat(disk.getFileContent(virtual + "/" + file2), is("SMEGMA"));
     }
     
+    
+    
     @Test
     public void testVirtualToRealCopyFile() throws Exception 
     {
@@ -341,6 +347,7 @@ public class DiskTest {
     }
     
     @Test
+    @Ignore
     public void testVirtualToRealCopyDirectory() throws Exception {
         String dir = disk.getCurrentDirectory();
         String virtual = "downloads";
@@ -392,5 +399,5 @@ public class DiskTest {
         List<String> files = disk.getFiles("/", "*.txt");
         assertThat(files.size(), is(2));
     }
-    */
+    
 }
