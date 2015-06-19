@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -70,7 +69,7 @@ public class Disk {
     /**
      * Create a new disk.
      *
-     * @param path The path where the disk will be write.
+     * @param path The path where the disk will be written.
      * @param sectorAmount The amount of oldSectors of the disk.
      * @param sectorSize The size of a single sector.
      */
@@ -830,13 +829,26 @@ public class Disk {
         {
             throw new FileNotFoundException("File '" + origin + "' doesn't exist.");
         }
-        if(destinationNode == null)
-        {
-            throw new FileNotFoundException("File '" + destination + "' doesn't exist.");
-        }
         if(originNode.getData().isDirectory())
         {
-            createDirectory(destination);
+            if(destinationNode == null)
+            {
+                createDirectory(destination);
+                destinationNode = searchTree(destination);
+            }
+            if(!destinationNode.getData().isDirectory())
+            {
+                throw new FileNotFoundException("Cant't copy a directory to a file.");
+            }
+            changeCurrentDirectory(destination);
+            destination = getCurrentDirectory();
+            if(originNode.hasChildren())
+            {
+                for(Tree<Node> child : originNode.children())
+                {
+                    copyVirtualToVirtual(origin+"/"+child.getData().getName(), destination);
+                }
+            }
         }
         else
         {
@@ -847,7 +859,7 @@ public class Disk {
             }
             else
             {
-                throw new FileNotFoundException("File '" + destination + "' doesn't exist.");
+                createFile(destination, getFileContent(origin));
             }
         }
         copiedNode = searchNode(destination);
