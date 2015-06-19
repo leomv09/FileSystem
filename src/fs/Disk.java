@@ -868,6 +868,10 @@ public class Disk {
      */
     public void copyVirtualToReal(String origin, String destination) throws IOException
     {
+        if(new java.io.File(destination).exists())
+        {
+            throw new FileAlreadyExistsException("File "+destination + " already exists.");
+        }
         java.io.File fileOut = new java.io.File(destination);
         Node originNode = searchNode(origin);
         if(originNode == null)
@@ -876,19 +880,16 @@ public class Disk {
         }
         if(originNode.isDirectory())
         {
+            new java.io.File(destination+"/"+origin).mkdir();
+            destination += "/"+origin;  
             if(!fileOut.isDirectory())
             {
                 throw new FileNotFoundException("Can't copy a directory into a file.");
             }
-            if(!(new java.io.File(destination+"/"+origin)).exists())
-            {
-                new java.io.File(destination+"/"+origin).mkdir();
-                destination += "/"+origin;            
-            }
             Tree<Node> tree = searchTree(origin);
             for(Tree<Node> child  : tree.children())
             {
-                copyVirtualToReal(origin+"/"+child.getData().getName(), destination);
+                copyVirtualToReal(origin+"/"+child.getData().getName(), destination+"/"+child.getData().getName());
             }
         }
         else

@@ -347,7 +347,6 @@ public class DiskTest {
     }
     
     @Test
-    @Ignore
     public void testVirtualToRealCopyDirectory() throws Exception {
         String dir = disk.getCurrentDirectory();
         String virtual = "downloads";
