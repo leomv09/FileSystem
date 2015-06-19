@@ -723,6 +723,7 @@ public class Disk {
     {
         java.io.File originFile = new java.io.File(origin);
         Tree<Node> destinationNode = searchTree(destination);
+        boolean exists = true;
         Node copiedNode = null;
         if(originFile.isDirectory())
         {
@@ -765,6 +766,84 @@ public class Disk {
             copiedNode.setCreationDate(new Date(attr.creationTime().to(TimeUnit.DAYS)));
             copiedNode.setLastModificationDate(new Date(originFile.lastModified()));
         } 
+    }
+    
+    /**
+     * Copies a file from a virtual srcTree to another virtual srcTree.
+     * 
+     * @param origin The first virtual path.
+     * @param destination The destination virtual path.
+     * @throws java.io.IOException
+     */
+    public void copyVirtualToVirtual(String origin, String destination) throws IOException, Exception
+    {
+        Node originNode = searchNode(origin);
+        Node destinationNode = searchNode(destination);
+        Node copiedNode = null;
+        boolean exists = true;
+        if(originNode == null)
+        {
+            throw new FileNotFoundException("File '" + origin + "' doesn't exist.");
+        }
+        if(originNode.isDirectory())
+        {
+            Tree<Node> tree = searchTree(origin);
+            System.out.println("Origin node is a directory");
+            if(destinationNode == null)
+            {
+                exists = false;
+                createDirectory(destination);
+                destinationNode = searchNode(destination);
+                System.out.println("Dir: "+destinationNode.getName()+" created");
+            }
+            if(!destinationNode.isDirectory())
+            {
+                throw new FileNotFoundException("Cant't copy a directory to a file.");
+            }
+            System.out.println("Destination node is a directory");
+            changeCurrentDirectory(destination);
+            destination = getCurrentDirectory();
+            if(exists)
+            {
+                createDirectory(origin);
+                destination += "/"+origin;            
+            }
+            for(Tree<Node> child : tree.children())
+            {
+                System.out.println("Creating child from: "+origin+"/"+child.getData().getName()+" to: "+destination);
+                copyVirtualToVirtual("/"+origin+"/"+child.getData().getName(), destination);
+            }
+        }
+        else
+        {
+            System.out.println("origin is a file");
+            if(exists(destination))
+            {
+                Node node = searchNode(destination);
+                if(node.isDirectory())
+                {
+                    String dir = getCurrentDirectory();
+                    changeCurrentDirectory(destination);
+                    System.out.println(originNode.getName());
+                    createFile(originNode.getName(), getFileContent(origin));
+                    changeCurrentDirectory(dir);
+                }
+                else
+                {
+                    writeToSectors(node.getSectors(), getFileContent(origin));
+                }    
+            }
+            else
+            {
+                createFile(destination, getFileContent(origin));
+            }
+        }
+        copiedNode = searchNode(destination);
+        if(copiedNode != null)
+        {
+            copiedNode.setCreationDate(originNode.getCreationDate());
+            copiedNode.setLastModificationDate(originNode.getLastModificationDate());
+        }      
     }
     
     
@@ -844,69 +923,5 @@ public class Disk {
         bw.close();
     }
     
-    /**
-     * Copies a file from a virtual srcTree to another virtual srcTree.
-     * 
-     * @param origin The first virtual path.
-     * @param destination The destination virtual path.
-     * @throws java.io.IOException
-     */
-    public void copyVirtualToVirtual(String origin, String destination) throws IOException, Exception
-    {
-        Node originNode = searchNode(origin);
-        Node destinationNode = searchNode(destination);
-        Node copiedNode = null;
-        if(originNode == null)
-        {
-            throw new FileNotFoundException("File '" + origin + "' doesn't exist.");
-        }
-        if(originNode.isDirectory())
-        {
-            Tree<Node> tree = searchTree(origin);
-            if(destinationNode == null)
-            {
-                createDirectory(destination);
-                destinationNode = searchNode(destination);
-                System.out.println("Dir: "+destinationNode.getName()+" created");
-            }
-            if(!destinationNode.isDirectory())
-            {
-                throw new FileNotFoundException("Cant't copy a directory to a file.");
-            }
-            changeCurrentDirectory(destination);
-            destination = getCurrentDirectory();
-            for(Tree<Node> child : tree.children())
-            {
-                copyVirtualToVirtual("/"+origin+"/"+child.getData().getName(), destination);
-            }
-        }
-        else
-        {
-            if(exists(destination))
-            {
-                Node node = searchNode(destination);
-                if(node.isDirectory())
-                {
-                    String dir = getCurrentDirectory();
-                    changeCurrentDirectory(destination);
-                    createFile(originNode.getName(), getFileContent(origin));
-                    changeCurrentDirectory(dir);
-                }
-                else
-                {
-                    writeToSectors(node.getSectors(), getFileContent(origin));
-                }    
-            }
-            else
-            {
-                createFile(destination, getFileContent(origin));
-            }
-        }
-        copiedNode = searchNode(destination);
-        if(copiedNode != null)
-        {
-            copiedNode.setCreationDate(originNode.getCreationDate());
-            copiedNode.setLastModificationDate(originNode.getLastModificationDate());
-        }      
-    }
+    
 }
