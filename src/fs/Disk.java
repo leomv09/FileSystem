@@ -823,9 +823,9 @@ public class Disk {
                 if(node.isDirectory())
                 {
                     String dir = getCurrentDirectory();
+                    String content = getFileContent(origin);
                     changeCurrentDirectory(destination);
-                    System.out.println(originNode.getName());
-                    createFile(originNode.getName(), getFileContent(origin));
+                    createFile(originNode.getName(), content);
                     changeCurrentDirectory(dir);
                 }
                 else

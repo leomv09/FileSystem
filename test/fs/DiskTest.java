@@ -40,6 +40,7 @@ public class DiskTest {
         }
     }
 
+    /*
     @Test
     public void testCreateFile() throws Exception {
         String dir = disk.getCurrentDirectory();
@@ -251,9 +252,8 @@ public class DiskTest {
         assertThat(disk.getFiles(dir+downloads), containsFile(file1));
         assertThat(disk.getFiles(dir+desktop), containsFile(file1));
     }
-    
+ */
     @Test
-    @Ignore
     public void testVirtualToVirtualCopyDirectory_DirectoryToOtherDirectory_KeepName() throws Exception {
         String dir = disk.getCurrentDirectory();
         String file1 = "file1.txt";
@@ -268,14 +268,14 @@ public class DiskTest {
         
         // Test copy directory to other directory keeping the same name.
         // [ copy(desktop, downloads) ]
-        disk.moveFile(downloads, desktop);
+        disk.copyVirtualToVirtual(downloads, desktop);
         assertThat(disk.getFiles(dir), containsDirectory(downloads));
-        assertThat(disk.getFiles(desktop), containsDirectory(downloads));
-        assertThat(disk.getFiles(desktop + "/" + downloads), containsFile(file1));
+        assertThat(disk.getFiles(dir+desktop), containsDirectory(downloads));
+        assertThat(disk.getFiles(dir+desktop + "/" + downloads), containsFile(file1));
     }
     
+/*
     @Test
-    @Ignore
     public void testVirtualToVirtualCopyDirectory_DirectoryToOtherDirectory_ChangeName() throws Exception {
         String dir = disk.getCurrentDirectory();
         String file1 = "file1.txt";
@@ -290,10 +290,10 @@ public class DiskTest {
         
         // Test copy directory to other directory with other name.
         // [ copy(downloads, desktop/desktop) ]
-        disk.moveFile(downloads, desktop + "/" + desktop);
+        disk.copyVirtualToVirtual(downloads, desktop + "/" + desktop);
         assertThat(disk.getFiles(dir), containsDirectory(downloads));
-        assertThat(disk.getFiles(desktop), containsDirectory(desktop));
-        assertThat(disk.getFiles(desktop + "/" + desktop), containsFile(file1));
+        assertThat(disk.getFiles(dir+desktop), containsDirectory(desktop));
+        assertThat(disk.getFiles(dir+desktop + "/" + desktop), containsFile(file1));
     }
     
     @Test
@@ -392,5 +392,5 @@ public class DiskTest {
         List<String> files = disk.getFiles("/", "*.txt");
         assertThat(files.size(), is(2));
     }
-    
+    */
 }
