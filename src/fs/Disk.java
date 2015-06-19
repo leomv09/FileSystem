@@ -880,7 +880,8 @@ public class Disk {
         }
         if(originNode.isDirectory())
         {
-            new java.io.File(destination+"/"+origin).mkdir();
+            new java.io.File(destination).mkdir();
+            new java.io.File(destination+"/"+origin).mkdir();  
             destination += "/"+origin;  
             if(!fileOut.isDirectory())
             {

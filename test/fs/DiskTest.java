@@ -25,7 +25,7 @@ public class DiskTest {
     public void setUp() {
         this.disk = new Disk(DiskTest.diskName, 1000, 10);
         realDirectory  = new java.io.File("real");
-        realDirectory.mkdir();
+        //realDirectory.mkdir();
     }
     
     @AfterClass
