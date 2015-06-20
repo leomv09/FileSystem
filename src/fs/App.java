@@ -52,7 +52,7 @@ public class App {
             String line;
             
 	    while (true) {
-		System.out.print("> ");
+		System.out.print(disk.getCurrentDirectory() + "> ");
 		line = input.readLine();
                 
                 if (line.length() > 0) {
@@ -126,6 +126,7 @@ public class App {
         result.put(CreateDiskCommand.COMMAND, new CreateDiskCommand());
         result.put(DeleteFileCommand.COMMAND, new DeleteFileCommand());
         result.put(MoveFileCommand.COMMAND, new MoveFileCommand());
+        result.put(ShowSectorsCommand.COMMAND, new ShowSectorsCommand());
         result.put(HelpCommand.COMMAND, new HelpCommand());
         result.put(ExitCommand.COMMAND, new ExitCommand());
 	return result;

@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -44,6 +46,11 @@ public class Disk {
      */
     private final java.io.File file;
 
+    /**
+     * List of sectors.
+     */
+    private final List<Sector> totalSectors;
+    
     /**
      * List of available oldSectors.
      */
@@ -82,7 +89,8 @@ public class Disk {
         this.sectorSize = sectorSize;
         this.sectorAmount = sectorAmount;
         this.root = new Tree<>(new Directory(""));
-        this.availableSectors = builder.create(this.sectorAmount);
+        this.totalSectors = builder.create(this.sectorAmount);
+        this.availableSectors = new ArrayList<>(this.totalSectors);
         this.current = root;
         if (file.exists()) {
             file.delete();
@@ -447,6 +455,23 @@ public class Disk {
         return tree;
     }
     
+    public List<String> getSectorsContent() {
+        List<String> list = new ArrayList<>();
+        String content;
+        
+        for (Sector sector : totalSectors) {
+            try {
+                content = readSector(sector);
+            } 
+            catch (IOException ex) { 
+                content = "";
+            }
+            list.add(content);
+        }
+        
+        return list;
+    }
+    
     /**
      * Get the files that satisfies certain regular expression in the tree.
      *
@@ -724,7 +749,7 @@ public class Disk {
         java.io.File originFile = new java.io.File(origin);
         Node destinationNode = searchNode(destination);
         boolean exists = true;
-        Node copiedNode = null;
+        Node copiedNode;
         if(originFile.isDirectory())
         {
             if(destinationNode == null)
@@ -794,7 +819,7 @@ public class Disk {
     {
         Node originNode = searchNode(origin);
         Node destinationNode = searchNode(destination);
-        Node copiedNode = null;
+        Node copiedNode;
         boolean exists = true;
         if(originNode == null)
         {
@@ -910,9 +935,9 @@ public class Disk {
     {
         java.io.File fileOut = new java.io.File(destination);
         FileWriter fw = new FileWriter(fileOut.getAbsoluteFile());
-        BufferedWriter bw = new BufferedWriter(fw);
-        bw.write(content);
-        bw.close();
+        try (BufferedWriter bw = new BufferedWriter(fw)) {
+            bw.write(content);
+        }
     }
     
     
