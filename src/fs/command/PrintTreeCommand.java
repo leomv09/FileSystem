@@ -75,7 +75,7 @@ public class PrintTreeCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Print the DIRECTORY subtree.";
+        return "Print the directory tree.";
     }
 
     @Override

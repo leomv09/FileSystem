@@ -52,7 +52,7 @@ public class FindFilesCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Find all files or directories that match REGEX";
+        return "Find all files or directories that match a regular expression";
     }
 
     @Override

@@ -52,7 +52,7 @@ public class MakeDirectoryCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Create the DIRECTORY(ies), if they do not already exist.";
+        return "Create a set of directories, if they do not already exist.";
     }
 
     @Override

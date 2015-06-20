@@ -48,7 +48,7 @@ public class ListPropertiesCommand extends Command{
     @Override
     protected String getDescription() 
     {
-        return "Obtains the properties of a given file.";
+        return "Print the properties of a file.";
     }
 
     @Override

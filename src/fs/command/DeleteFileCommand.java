@@ -44,7 +44,7 @@ public class DeleteFileCommand extends Command {
     @Override
     protected String getDescription() 
     {
-        return "Deletes the FILE(s) from the file system.";
+        return "Deletes a set of files.";
     }
 
     @Override

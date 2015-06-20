@@ -92,7 +92,7 @@ public class CopyCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "Copy SOURCE to DEST";
+        return "Copy a file or directory to another location.";
     }
 
     @Override

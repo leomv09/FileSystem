@@ -42,7 +42,7 @@ public class MoveFileCommand extends Command {
     @Override
     protected String getDescription() 
     {
-        return "Moves a file or directory to another directory.";
+        return "Moves a file or directory to another location.";
     }
 
     @Override

@@ -50,7 +50,7 @@ public class ListFilesCommand extends Command {
 
     @Override
     protected String getDescription() {
-        return "List the files in DIRECTORY.";
+        return "List the files in a directory.";
     }
 
     @Override
