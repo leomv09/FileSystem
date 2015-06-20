@@ -109,10 +109,10 @@ public class Disk {
     public void changeCurrentDirectory(String path) throws FileNotFoundException, NotDirectoryException {
         Tree<Node> actual = searchTree(path);
         if (actual == null) {
-            throw new FileNotFoundException("Directory \"" + path + "\" not found");
+            throw new FileNotFoundException("Directory \"" + path + "\" not found.");
         }
         if (!actual.getData().isDirectory()) {
-            throw new NotDirectoryException("The path is not a directory");
+            throw new NotDirectoryException("The path is not a directory.");
         }
         current = actual;
     }
@@ -170,7 +170,7 @@ public class Disk {
         
         if (node == null)
         {
-            throw new FileNotFoundException("File \"" + path + "\" not found");
+            throw new FileNotFoundException("File \"" + path + "\" not found.");
         }
         
         return readSectors(node.getSectors());
@@ -180,7 +180,7 @@ public class Disk {
        Tree<Node> tree = searchTree(path);
        
        if (tree == null) {
-           throw new FileNotFoundException("File \"" + path + "\" not found");
+           throw new FileNotFoundException("File \"" + path + "\" not found.");
        }
        
        return getAbsolutePath(tree);
@@ -197,7 +197,7 @@ public class Disk {
         Node node = searchNode(path);
         
         if (node == null) {
-            throw new FileNotFoundException("File \"" + path + "\" not found");
+            throw new FileNotFoundException("File \"" + path + "\" not found.");
         }
         
         List<Sector> oldSectors = node.getSectors();
@@ -205,7 +205,7 @@ public class Disk {
         
         int required = requiredSectors(content);
         if (required > availableSectors.size()) {
-            throw new IOException("Insufficient disk space");
+            throw new IOException("Insufficient disk space.");
         }
 
         List<Sector> newSectors = getSectors(required);
@@ -237,7 +237,7 @@ public class Disk {
         Node node = searchNode(path);
         
         if (node == null) {
-            throw new FileNotFoundException("File not found");
+            throw new FileNotFoundException("File \"" + path + "\" not found.");
         }
         
         Map<String, Object> properties = new TreeMap<>((Object o1, Object o2) -> 1);
@@ -262,10 +262,10 @@ public class Disk {
      */
     public void createFile(String path, String content) throws Exception {
         if (!FileUtils.isValidPath(path)) {
-            throw new MalformedURLException("Invalid file name");
+            throw new MalformedURLException("Invalid file name.");
         }
         if (exists(path)) {
-            throw new FileAlreadyExistsException("File \"" + path + "\" already exists");
+            throw new FileAlreadyExistsException("File \"" + path + "\" already exists.");
         }
 
         String fileName = FileUtils.getFileName(path);
@@ -273,12 +273,12 @@ public class Disk {
 
         Tree<Node> parent = searchTree(directory);
         if (parent == null || !parent.getData().isDirectory()) {
-            throw new FileNotFoundException("Directory \"" + directory + "\" doesn't exists");
+            throw new FileNotFoundException("Directory \"" + directory + "\" doesn't exists.");
         }
 
         int required = requiredSectors(content);
         if (required > availableSectors.size()) {
-            throw new IOException("Insufficient disk space");
+            throw new IOException("Insufficient disk space.");
         }
 
         List<Sector> sectors = getSectors(required);
@@ -298,10 +298,10 @@ public class Disk {
         Tree<Node> tree = searchTree(path);
         Node node = tree.getData();
         if (tree == null) {
-            throw new FileNotFoundException("File \"" + path + "\" doesn't exist");
+            throw new FileNotFoundException("File \"" + path + "\" doesn't exist.");
         }
         if (tree.isRoot()) {
-            throw new AccessDeniedException("Root folder cannot be deleted");
+            throw new AccessDeniedException("Root folder cannot be deleted.");
         }
         deleteTree(tree);
         if (current.getData().equals(node)) {
@@ -318,10 +318,10 @@ public class Disk {
      */
     public void createDirectory(String path) throws Exception {
         if (!FileUtils.isValidPath(path)) {
-            throw new MalformedURLException("Invalid directory name");
+            throw new MalformedURLException("Invalid directory name.");
         }
         if (exists(path)) {
-            throw new FileAlreadyExistsException("Directory \"" + path + "\" already exist");
+            throw new FileAlreadyExistsException("Directory \"" + path + "\" already exist.");
         }
 
         String name = FileUtils.getFileName(path);
@@ -329,7 +329,7 @@ public class Disk {
 
         Tree<Node> parent = searchTree(directory);
         if (parent == null || !parent.getData().isDirectory()) {
-            throw new FileNotFoundException("Directory \"" + directory + "\" doesn't exist");
+            throw new FileNotFoundException("Directory \"" + directory + "\" doesn't exist.");
         }
 
         Node node = new Directory(name);
@@ -347,7 +347,7 @@ public class Disk {
         Tree<Node> srcTree = searchTree(src);
 
         if (srcTree == null) {
-            throw new FileNotFoundException("File \"" + src + "\" doesn't exist");
+            throw new FileNotFoundException("File \"" + src + "\" doesn't exist.");
         }
         
         Tree<Node> destTree = searchTree(dest);
@@ -368,7 +368,7 @@ public class Disk {
                 destTree = searchTree(directory);
 
                 if (destTree == null) {
-                    throw new FileNotFoundException("Directory '" + directory + "' doesn't exist");
+                    throw new FileNotFoundException("Directory '" + directory + "' doesn't exist.");
                 }
 
                 srcTree.setParent(destTree);
@@ -395,7 +395,7 @@ public class Disk {
         }
         
         if (!tree.getData().isDirectory()) {
-            throw new NotDirectoryException("The path is not a directory");
+            throw new NotDirectoryException("The path is not a directory.");
         }
         
         List<Node> list = new ArrayList();
@@ -423,14 +423,14 @@ public class Disk {
         }
         
         if (!tree.getData().isDirectory()) {
-            throw new NotDirectoryException("The path is not a directory");
+            throw new NotDirectoryException("The path is not a directory.");
         }
         
         try {
             return getFiles(tree, regex.replace("*", ".*"));
         }
         catch (PatternSyntaxException ex) {
-            throw new IOException("Invalid regular expression " + regex);
+            throw new IOException("Invalid regular expression: " + regex);
         }
     }
 
@@ -449,7 +449,7 @@ public class Disk {
         }
         
         if (!tree.getData().isDirectory()) {
-            throw new NotDirectoryException("The path is not a directory");
+            throw new NotDirectoryException("The path is not a directory.");
         }
         
         return tree;
@@ -823,7 +823,7 @@ public class Disk {
         boolean exists = true;
         if(originNode == null)
         {
-            throw new FileNotFoundException("File '" + origin + "' doesn't exist.");
+            throw new FileNotFoundException("File \"" + origin + "\" doesn't exist.");
         }
         if(originNode.isDirectory())
         {
@@ -895,13 +895,13 @@ public class Disk {
     {
         if(new java.io.File(destination).exists())
         {
-            throw new FileAlreadyExistsException("File "+destination + " already exists.");
+            throw new FileAlreadyExistsException("File \"" + destination + "\" already exists.");
         }
         java.io.File fileOut = new java.io.File(destination);
         Node originNode = searchNode(origin);
         if(originNode == null)
         {
-            throw new FileNotFoundException("File '" + origin + "' doesn't exist");
+            throw new FileNotFoundException("File \"" + origin + "\" doesn't exist");
         }
         if(originNode.isDirectory())
         {
