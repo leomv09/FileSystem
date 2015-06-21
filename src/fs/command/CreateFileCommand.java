@@ -2,8 +2,7 @@ package fs.command;
 
 import fs.App;
 import fs.Disk;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import fs.util.FileUtils;
 import java.util.Arrays;
 
 /**
@@ -26,16 +25,11 @@ public class CreateFileCommand extends Command {
         App app = App.getInstance();
         Disk disk = app.getDisk();
         
+        if (disk.exists(path) && !FileUtils.promptForVirtualOverride(path)) {
+            return;
+        }
+        
         try {
-            if (disk.exists(path)) {
-                System.out.print("File already exists. Do you want to override it? [y/n] ");
-                BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-                String line = input.readLine();
-                if (!line.equalsIgnoreCase("y")) {
-                    return;
-                }
-                disk.delete(path);
-            }
             disk.createFile(path, content);
         }
         catch (Exception ex) {

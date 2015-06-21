@@ -6,9 +6,9 @@ import org.junit.Test;
 import java.nio.file.Files;
 import java.util.List;
 import static fs.matchers.ContainsNodeMatcher.*;
+import fs.util.FileUtils;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 
 /**
  *
@@ -18,13 +18,12 @@ public class DiskTest {
 
     private static final String diskName = "test-disk.txt";
     private static final java.io.File realFile = new java.io.File("file1.txt");
-    private static java.io.File realDirectory;
+    private static final java.io.File realDirectory = new java.io.File("real");
     private Disk disk;
 
     @Before
     public void setUp() {
         this.disk = new Disk(DiskTest.diskName, 1000, 10);
-        DiskTest.realDirectory = new java.io.File("real");
     }
 
     @AfterClass
@@ -34,22 +33,13 @@ public class DiskTest {
             file.delete();
         }
         if (DiskTest.realFile.exists()) {
-            delete(DiskTest.realFile);
+            FileUtils.delete(DiskTest.realFile);
         }
         if (DiskTest.realDirectory.exists()) {
-            delete(DiskTest.realDirectory);
+            FileUtils.delete(DiskTest.realDirectory);
         }
     }
-
-    private static void delete(java.io.File f) {
-        if (f.isDirectory()) {
-            for (java.io.File c : f.listFiles()) {
-                delete(c);
-            }
-        }
-        f.delete();
-    }
-
+    
     @Test
     public void testCreateFile() throws Exception {
         String dir = disk.getCurrentDirectory();
@@ -358,9 +348,8 @@ public class DiskTest {
         assertTrue(DiskTest.realDirectory.exists());
         assertTrue(DiskTest.realDirectory.isDirectory());
 
-        java.io.File realDownloads = new java.io.File(DiskTest.realDirectory, virtual);
-        java.io.File real1 = new java.io.File(realDownloads, file1);
-        java.io.File real2 = new java.io.File(realDownloads, file2);
+        java.io.File real1 = new java.io.File(DiskTest.realDirectory, file1);
+        java.io.File real2 = new java.io.File(DiskTest.realDirectory, file2);
 
         assertTrue(real1.exists());
         assertTrue(real1.isFile());

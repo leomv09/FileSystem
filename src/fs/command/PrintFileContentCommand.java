@@ -31,7 +31,7 @@ public class PrintFileContentCommand extends Command {
             for (int i = 0; i < ceil; i++) {
                 System.out.println(StringUtils.substring(content, i*block, (i+1)*block));
             }
-        } 
+        }
         catch (IOException ex) {
             reportError(ex);
         }

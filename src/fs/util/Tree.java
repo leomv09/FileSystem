@@ -38,7 +38,7 @@ public class Tree<T> {
      * @param data The data to store.
      * @param allowsChildren If the tree allows children nodes.
      */
-    private Tree(Tree parent, T data, boolean allowsChildren) {
+    public Tree(Tree parent, T data, boolean allowsChildren) {
         this.data = data;
         this.parent = parent;
         this.allowsChildren = allowsChildren;

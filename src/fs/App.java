@@ -115,7 +115,7 @@ public class App {
 	result.put(ListFilesCommand.COMMAND, new ListFilesCommand());
         result.put(CreateFileCommand.COMMAND, new CreateFileCommand());
         result.put(ChangeFileCommand.COMMAND, new ChangeFileCommand());
-        result.put(MakeDirectoryCommand.COMMAND, new MakeDirectoryCommand());
+        result.put(CreateDirectoryCommand.COMMAND, new CreateDirectoryCommand());
         result.put(ChangeCurrentDirectoryCommand.COMMAND, new ChangeCurrentDirectoryCommand());
         result.put(FindFilesCommand.COMMAND, new FindFilesCommand());
         result.put(PrintCurrentDirectoryCommand.COMMAND, new PrintCurrentDirectoryCommand());

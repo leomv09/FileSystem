@@ -17,4 +17,10 @@ public class File extends Node {
         this(name, new ArrayList<>());
     }
     
+    public File(File file) {
+        this(file.name);
+        this.creationDate = file.creationDate;
+        this.lastModificationDate = file.lastModificationDate;
+    }
+    
 }

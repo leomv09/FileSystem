@@ -2,14 +2,13 @@ package fs.command;
 
 import fs.App;
 import fs.Disk;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import fs.util.FileUtils;
 
 /**
  *
  * @author José Andrés García Sáenz <jags9415@gmail.com>
  */
-public class MakeDirectoryCommand extends Command {
+public class CreateDirectoryCommand extends Command {
 
     public static final String COMMAND = "mkdir";
 
@@ -26,17 +25,12 @@ public class MakeDirectoryCommand extends Command {
 
         for (int i = 1; i < args.length; i++) {
             path = args[i];
+            
+            if (disk.exists(path) && !FileUtils.promptForVirtualOverride(path)) {
+                continue;
+            }
 
             try {
-                if (disk.exists(path)) {
-                    System.out.print("There is already a directory with the same name. Do you want to override it? [y/n] ");
-                    BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-                    String line = input.readLine();
-                    if (!line.equalsIgnoreCase("y")) {
-                        return;
-                    }
-                    disk.delete(path);
-                }
                 disk.createDirectory(path);
             } 
             catch (Exception ex) {

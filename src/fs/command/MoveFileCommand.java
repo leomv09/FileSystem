@@ -2,7 +2,7 @@ package fs.command;
 
 import fs.App;
 import fs.Disk;
-import java.io.IOException;
+import fs.util.FileUtils;
 
 /**
  *
@@ -25,6 +25,11 @@ public class MoveFileCommand extends Command {
             Disk disk = app.getDisk();
             String src = args[1];
             String dest = args[2];
+            
+            if (disk.isFile(dest) && !FileUtils.promptForVirtualOverride(dest)) {
+                return;
+            }
+            
             disk.moveFile(src, dest);
         } 
         catch (Exception ex) 

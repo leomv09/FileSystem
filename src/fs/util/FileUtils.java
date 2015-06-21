@@ -1,5 +1,11 @@
 package fs.util;
 
+import fs.App;
+import fs.Disk;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  *
  * @author José Andrés García Sáenz <jags9415@gmail.com>
@@ -42,8 +48,61 @@ public class FileUtils {
         if (index == -1) {
             return "";
         } else {
-            return path.substring(0, index);
+            return path.substring(0, index + 1);
         }
     }
+    
+    public static String appendPath(String parent, String child) {
+        if (!parent.endsWith("/")) {
+            parent += "/";
+        }
+        return parent + child;
+    }
 
+    public static void delete(java.io.File f) {
+        if (f.isDirectory()) {
+            for (java.io.File c : f.listFiles()) {
+                delete(c);
+            }
+        }
+        f.delete();
+    }
+    
+    public static boolean promptForVirtualOverride(String path) {
+        App app = App.getInstance();
+        Disk disk = app.getDisk();
+        
+        try {
+            System.out.print("File \"" + disk.getAbsolutePath(path)  + "\" already exists. Do you want to override it? [y/n] ");
+            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+            String line = input.readLine();
+            if (!line.equalsIgnoreCase("y")) {
+                return false;
+            }
+            disk.delete(path);
+            return true;
+        } 
+        catch (IOException ex) {
+            return false;
+        }
+    }
+    
+    public static boolean promptForRealOverride(String path) {
+        java.io.File file = new java.io.File(path);
+        
+        try {
+            System.out.print("File \"" + file.getAbsolutePath() + "\" already exists. Do you want to override it? [y/n] ");
+            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+            String line = input.readLine();
+            if (!line.equalsIgnoreCase("y")) {
+                return false;
+            }
+            FileUtils.delete(file);
+            return true;
+        } 
+        catch (IOException ex) {
+            return false;
+        }
+    }
+    
 }

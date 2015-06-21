@@ -10,4 +10,10 @@ public class Directory extends Node {
         super(name);
     }
     
+    public Directory(Directory directory) {
+        this(directory.name);
+        this.creationDate = directory.creationDate;
+        this.lastModificationDate = directory.lastModificationDate;
+    }
+    
 }

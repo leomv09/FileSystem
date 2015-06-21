@@ -13,12 +13,11 @@ import java.util.Objects;
  */
 public abstract class Node {
     
-    private String name;
-    private final boolean isDirectory;
-    private Date creationDate;
-    private Date lastModificationDate;
-    private List<Sector> sectors;
-    
+    protected String name;
+    protected final boolean isDirectory;
+    protected Date creationDate;
+    protected Date lastModificationDate;
+    protected List<Sector> sectors;
     
     /**
      * Creates a new file Node object.
@@ -106,6 +105,7 @@ public abstract class Node {
     */
     public void setSectors(List<Sector> sectors) {
         this.sectors = sectors;
+        this.lastModificationDate = new Date();
     }
 
    /**

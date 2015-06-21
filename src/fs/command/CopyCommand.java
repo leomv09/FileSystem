@@ -2,6 +2,7 @@ package fs.command;
 
 import fs.App;
 import fs.Disk;
+import fs.util.FileUtils;
 import java.io.IOException;
 
 /**
@@ -60,6 +61,9 @@ public class CopyCommand extends Command {
     
     private void copyVirtualToVirtual(Disk disk, String src, String dest) {
         try {
+            if (disk.isFile(dest) && !FileUtils.promptForVirtualOverride(dest)) {
+                return;
+            }
             disk.copyVirtualToVirtual(src, dest);
         } 
         catch (Exception ex) {
@@ -69,6 +73,10 @@ public class CopyCommand extends Command {
     
     private void copyVirtualToReal(Disk disk, String src, String dest) {
         try {
+            java.io.File file = new java.io.File(dest);
+            if (file.isFile() && !FileUtils.promptForRealOverride(dest)) {
+                return;
+            }
             disk.copyVirtualToReal(src, dest);
         }
         catch (IOException ex) {
@@ -78,6 +86,9 @@ public class CopyCommand extends Command {
     
     private void copyRealToVirtual(Disk disk, String src, String dest) {
         try {
+            if (disk.isFile(dest) && !FileUtils.promptForVirtualOverride(dest)) {
+                return;
+            }
             disk.copyRealToVirtual(src, dest);
         } 
         catch (Exception ex) {
